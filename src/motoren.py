@@ -52,67 +52,6 @@ def setForward():
 	GPIO.output(oa2,GPIO.HIGH)  
 	GPIO.output(ob1,GPIO.LOW)
 	GPIO.output(ob2,GPIO.HIGH)  
-def stop():
-	global motorstop
-	motorstop = True
-	GPIO.output(oa1,GPIO.LOW)
-	GPIO.output(oa2,GPIO.LOW)
-	GPIO.output(ob1,GPIO.LOW)
-	GPIO.output(ob2,GPIO.LOW)
-	pa.ChangeDutyCycle(0)  
-	pb.ChangeDutyCycle(0)  
-	#mqttsend('direction','stop')	
-def start():
-	global motorstop
-	motorstop = False
-
-def getMotorenJson(links,rechts):
-		return json.dumps({"links": round(links,1),"rechts": round(rechts,1)})
-def lenke(o,fahrtrichtung):	
-	global motorstop
-	if not motorstop:
-		r = power + o
-		r = min(100.0,r)
-		r = max(-100,r)		
-		'''
-		vorwärts und r > 0
-		nicht vorwärts und nicht r > 0
-		'''
-		if (r>=0)^(not fahrtrichtung):
-			GPIO.output(oa1,GPIO.LOW)
-			GPIO.output(oa2,GPIO.HIGH)  
-		else:
-			GPIO.output(oa1,GPIO.HIGH)
-			GPIO.output(oa2,GPIO.LOW)  
-		if r < 0:
-			r = -r
-		r = round(r,1)
-		l = power - o 
-		l = min(100.0,l)
-		l = max(-100.0,l)
-		if (l>=0)^(not fahrtrichtung):
-			GPIO.output(ob1,GPIO.LOW)
-			GPIO.output(ob2,GPIO.HIGH)
-		else:
-			GPIO.output(ob1,GPIO.HIGH)
-			GPIO.output(ob2,GPIO.LOW)
-		if l < 0:
-			l = -l
-		l = round(l,1)
-		if fahrtrichtung:
-			L = l
-			R = r
-			pa.ChangeDutyCycle(r)  
-			pb.ChangeDutyCycle(l)
-		else:
-			L = r
-			R = l
-			pa.ChangeDutyCycle(l)  
-			pb.ChangeDutyCycle(r)
-		mqttsend('motors', getMotorenJson(L,R))	
-	else:
-		mqttsend('motors', getMotorenJson(0,0))	
-	
 def gerade():
 	pa.ChangeDutyCycle(power)  
 	pb.ChangeDutyCycle(power)  
@@ -161,6 +100,80 @@ def play():
 	sleep(1)
 	stop()
 	
+
+		
+def stop():
+	global motorstop
+	motorstop = True
+	GPIO.output(oa1,GPIO.LOW)
+	GPIO.output(oa2,GPIO.LOW)
+	GPIO.output(ob1,GPIO.LOW)
+	GPIO.output(ob2,GPIO.LOW)
+	pa.ChangeDutyCycle(0)  
+	pb.ChangeDutyCycle(0)  
+	#mqttsend('direction','stop')	
+def start():
+	global motorstop
+	motorstop = False
+def getMotorenJson(ri,val,links,rechts,fl,fr):
+		return json.dumps({"richtung":ri,"val":val, "links": round(links,1),"rechts": round(rechts,1),"FL":fl,"FR":fr})
+def lenke(o,fahrtrichtung):	 #o wert +rechts, -links, 0 mitte, rückwärts motoren wechseln und drehrichtung wechseln
+	global motorstop
+	if not motorstop:
+	#rückwärts: rechts und links tauschen: zuerst die werte, dann die polung. 
+		r = power + o
+		r = min(100.0,r)
+		r = max(-100,r)
+		r = round(r,1)
+		
+		l = power - o 
+		l = min(100.0,l)
+		l = max(-100.0,l)
+		l = round(l,1)
+		
+		if not fahrtrichtung: #werte tauschen
+		  x=r
+		  r=l
+		  l=x
+		  
+		'''
+		vorwärts und r > 0
+		nicht vorwärts und nicht r > 0
+		'''
+		fr = 0 #Drehrichtung umdrehen
+		if (r>=0)^(not fahrtrichtung):
+			fr=1
+			GPIO.output(oa1,GPIO.LOW)
+			GPIO.output(oa2,GPIO.HIGH)  
+		else:
+			fr=-1
+			GPIO.output(oa1,GPIO.HIGH)
+			GPIO.output(oa2,GPIO.LOW)  
+		if r < 0:
+			r = -r
+		
+	
+		fl=0
+		if (l>=0)^(not fahrtrichtung):
+			fl=1
+			GPIO.output(ob1,GPIO.LOW)
+			GPIO.output(ob2,GPIO.HIGH)
+		else:
+			fl=-1
+			GPIO.output(ob1,GPIO.HIGH)
+			GPIO.output(ob2,GPIO.LOW)
+		if l < 0:
+			l = -l
+		
+		
+		pa.ChangeDutyCycle(r)  
+		pb.ChangeDutyCycle(l)
+		L = l*fl
+		R = r*fr
+		mqttsend('motors', getMotorenJson(fahrtrichtung,o,L,R,fl,fr))	
+	else:
+		mqttsend('motors', getMotorenJson(True,0,0,0,0,0))	
+	
 def stoptest():
 	stop()
 	setForward()
@@ -176,68 +189,39 @@ def stoptest():
 	lenke(0)
 	while True:
 		time.sleep(0.1)	
+
+def lenktest():
+	t=5
+	setPower(50)
+	start()
+	lenke(0,True)
+	time.sleep(t)	
+	lenke(0,False)
+	time.sleep(t)	
+	lenke(30,True)
+	time.sleep(t)	
+	lenke(30,False)
+	time.sleep(t)	
+	lenke(0,True)
+	time.sleep(t)	
+	lenke(-30,True)
+	time.sleep(t)	
+	lenke(-30,False)
+	time.sleep(t)	
+	lenke(-30,False)
+	stop()
+
 	
+    
+		
+		
 #stoptest()
+lenktest()
 #setRichtung(2)	
 #play()	
 #playRichtungen()
   
 """
-  fahre 
-  vor rück    schnell langsam
-  rechts links  schwach stark sehr stark
-  selbstlernend je nach untergrund
-  
-  startpunkt 
-  zur linie
-  entlang der linie
-  abweichung von linie im vergleich mit vorher
-  richtung wie leitline
-  abweichung minimieren  
-  takten sekundentakt
-  
-  zielrichtung
-  letzte mit akt position bring akt. richtung
-  drehen in zielrichtung über kleinsten winkel, damit klar links oder rechts
-  aber schnell eintauchen
-  also maximal senkrecht auf leitline steuern als tendenz
-  Abstand groß  ziel die leitline
-  sonst ziel die zielpos
-  
-  erste lösung: 
-  links rechts berechnen anhand Ist/Ziel-Richtung und 
-  P-Anteil Abstand in cm   und daraus eine SollZielrichtung und diese regeln P
-  I-Anteil mittlere Abweichung (Hang)   
-  D-Anteil ACC Modul
-  
-  
-  
-  
-  letzte messung
-  akt
-  fahrtrichung winkel
-  zielpunkt  winkel
-  daraus links rechts
-  
-  abstand zur solllinie (Start + Zielpunkt)
-  
-  erster versuch 
-  startpunkt und zielpunkt ist fest programmiert
-  setzen des Fahrzeuges, starten in irgendeine richtung
-  es muss anfahren, in die korrekte richtung drehen und der linie folgen.
-  
-  Am Ziel werden Start und Ziel getauscht für den Dauertest.
-  
-  Optimieren des Reglers im Betrieb per KI
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
 """
   
