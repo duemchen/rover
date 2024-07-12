@@ -1,0 +1,134 @@
+    1  sudo raspi-config 
+    2  cd Documents/
+    3  ls
+    4  python test.py 
+    5  sudo apt-get install gpsd gpsd-clients python-gps
+    6  python -v
+    7  sudo apt-get install gpsd gpsd-clients python-gpssudo apt update
+    8  sudo apt update
+    9  sudo apt full-upgrade
+   10  sudo apt-get install gpsd gpsd-clients python-gpssudo apt update
+   11  sudo apt-get install gpsd gpsd-clients python-gps
+   12  sudo apt-get install gpsd gpsd-clients
+   13  sudo apt-get install python-gps
+   14  sudo apt-get install gpsd-tools gpsd-clients
+   15  sudo systemctl stop gpsd.socket 
+   16  sudo systemctl disable gpsd.socket 
+   17  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock 
+   18  gpsmon 
+   19  cgps
+   20  exit
+   21  reboot
+   22  sudo reboot
+   23  gpsmon 
+   24  sgps
+   25  cgps
+   26  raspi-config 
+   27  sudo raspi-config 
+   28  reboot
+   29  sudo reboot
+   30  sgps
+   31  cgps
+   32  sudo reboot
+   33  cd Documents/
+   34  python test.py 
+   35  raspi-config 
+   36  sudo raspi-config 
+   37  sudo systemctl status gpsd.socket 
+   38  python3 test.py 
+   39  sudo systemctl stop gpsd.socket 
+   40  sudo systemctl disable gpsd.socket 
+   41  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock 
+   42  gpsmon 
+   43  cgps
+   44  gpsmon
+   45  gpsmon 
+   46  cgps
+   47  python test.py 
+   48  cgps
+   49  python test.py 
+   50  cgps
+   51  python test.py 
+   52  reboot
+   53  sudo reboot
+   54  cd Documents/
+   55  python test.py 
+   56  sudo systemctl status gpsd.socket 
+   57  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock
+   58  cgps
+   59  python test.py 
+   60  python /home/pi/Documents/test.py 
+   61  ls
+   62  cd Documents/
+   63  python test.py 
+   64  python motor_rubber.py 
+   65  python test.py 
+   66  history > histo.txt
+   67  cgps
+   68  sudo systemctl stop gpsd.socket
+   69  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock 
+   70  gpsmon 
+   71  cgps 
+   72  python test.py 
+   73  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock
+   74  python test.py 
+   75  reboot
+   76  sudo reboot
+   77  cd Documents/
+   78  python ADS1115_RaspiPython.py 
+   79  exit
+   80  cd /home/pi/Documents/
+   81  python test.py 
+   82  python testorig.py 
+   83  gpsmon 
+   84  cgps 
+   85  python test.py 
+   86  python testorig.py 
+   87  cgps
+   88  gpsmon
+   89  raspi-config 
+   90  sudo raspi-config 
+   91  cgps
+   92  python testorig.py 
+   93  python test.py 
+   94  python3 test.py 
+   95  python -version
+   96  python -v
+   97  sudo systemctl status gpsd.socket
+   98  sudo systemctl stop gpsd.socket
+   99  sudo systemctl disable  gpsd.socket
+  100  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock
+  101  gpsmon 
+  102  cgps
+  103  gpsmon /dev/Serial0
+  104  sudo gpsmon /dev/Serial0
+  105  sudo gpsmon
+  106  python3 test.py 
+  107  sudo gpsd /dev/serial0 -F /var/run/gpsd.sock
+  108  python3 test.py 
+  109  cgps
+  110  apt-get update
+  111  sudo apt-get update
+  112  sudo apt-get upgrade
+  113  cgps
+  114  gpsmon
+  115  gpsmon -help
+  116  sudo systemctl status gpsd.socket
+  117  reboot
+  118  sudo reboot
+  119  cgps
+  120  gpsmon 
+  121  gpsmon /dev/serial0
+  122  gpsmon /dev/serial1
+  123  ls -l /dev/ser*
+  124  sudo nano /boot/config.txt 
+  125  sudo nano /boot/firmware/config.txt 
+  126  sudo reboot
+  127  ls -l /dev/ser*
+  128  cd Documents/
+  129  python3 testorig.py 
+  130  gpsmon /dev/serial0
+  131  cgps 
+  132  cgps /dev/serial0
+  133  python3 test.py 
+  134  history > histo.txt
