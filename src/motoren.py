@@ -121,6 +121,9 @@ def lenke(o,fahrtrichtung):	 #o wert +rechts, -links, 0 mitte, rückwärts motor
 	global motorstop
 	if not motorstop:
 	#rückwärts: rechts und links tauschen: zuerst die werte, dann die polung. 
+		if not fahrtrichtung: #in Gegenrichtung lenken
+			o = -o
+	    
 		r = power + o
 		r = min(100.0,r)
 		r = max(-100,r)
@@ -131,10 +134,6 @@ def lenke(o,fahrtrichtung):	 #o wert +rechts, -links, 0 mitte, rückwärts motor
 		l = max(-100.0,l)
 		l = round(l,1)
 		
-		if not fahrtrichtung: #werte tauschen
-		  x=r
-		  r=l
-		  l=x
 		  
 		'''
 		vorwärts und r > 0
@@ -192,24 +191,28 @@ def stoptest():
 
 def lenktest():
 	t=5
-	setPower(50)
-	start()
-	lenke(0,True)
-	time.sleep(t)	
-	lenke(0,False)
-	time.sleep(t)	
-	lenke(30,True)
-	time.sleep(t)	
-	lenke(30,False)
-	time.sleep(t)	
-	lenke(0,True)
-	time.sleep(t)	
-	lenke(-30,True)
-	time.sleep(t)	
-	lenke(-30,False)
-	time.sleep(t)	
-	lenke(-30,False)
-	stop()
+	while True:
+		stop()
+		setPower(90)
+		start()
+		lenke(0,True)
+		time.sleep(t)	
+		lenke(0,False)
+		time.sleep(t)	
+		lenke(30,True)
+		time.sleep(t)	
+		lenke(30,False)
+		time.sleep(t)	
+		lenke(0,True)
+		time.sleep(t)	
+		lenke(-30,True)
+		time.sleep(t)	
+		lenke(-30,False)
+		time.sleep(t)	
+		lenke(0,False)
+		stop()
+		time.sleep(t)	
+		time.sleep(t)	
 
 	
     
