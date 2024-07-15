@@ -1,6 +1,7 @@
 {
     "pWert": 70,
     "pMax": 100,
+	"iWert": 64,
     "iFaktor": 0.3,
     "iMax": 100
 }

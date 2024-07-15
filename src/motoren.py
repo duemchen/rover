@@ -219,7 +219,7 @@ def lenktest():
 		
 		
 #stoptest()
-lenktest()
+#lenktest()
 #setRichtung(2)	
 #play()	
 #playRichtungen()

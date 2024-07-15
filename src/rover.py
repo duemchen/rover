@@ -59,7 +59,7 @@ while True:
 		continue
 	# Action
 	print('Rover moves'+ basisstation.getPositionJson(r))
-	motoren.setForward()
+	#motoren.setForward()
 	motoren.setPower(90)
 	motoren.start()	
 	#v = rs.getLenkrichtung()

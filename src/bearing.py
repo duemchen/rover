@@ -6,6 +6,7 @@ import mqtt_test
 import motoren 
 import threading
 import json  
+import voltage
 
 
 #bus = None
@@ -102,7 +103,8 @@ def startBearing():
 	t.start()
 	
 def run_server():
-	fahrtrichtung = True
+	voltage.startVoltage()
+	fahrtrichtung = not True
 	setSollWinkel(199,fahrtrichtung)
 	startBearing()
 	setMotor(90)
@@ -118,8 +120,29 @@ def run_server():
 			setSollWinkel(int(x),fahrtrichtung)			
 		time.sleep(0.1)
 
+def run_vorrueck():
+	voltage.startVoltage()
+	fahrtrichtung = True
+	setSollWinkel(199,fahrtrichtung)
+	startBearing()
+	setMotor(90)
+	motoren.start()	
+	
+	"""Simulated function for server main loop."""
+	x=3
+	y=0
+	while True:
+		print(y)
+		setSollWinkel(y,True)			
+		time.sleep(x)
+		setSollWinkel(y+180,False)			
+		time.sleep(x)
+		y += 45
 
-run_server()
+
+		
+#run_server()
+#run_vorrueck()
 
 '''
 Lenkung sorgt für die Einhaltung einer Sollrichtung (Himmelsrichtung)

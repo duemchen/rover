@@ -5,7 +5,7 @@ import time
 import roverparams
 
 nahAbstand = 0.06 
-iAbstand = 12
+iAbstand = 65
 
 def saveiAbstand(ab):
 	global iAbstand
@@ -107,10 +107,11 @@ class RoverDynamic:
 	
 	def __init__(self):		
 		self.__lastStatic = None	
-		self.iAbstand = getiAbstand()		
-		print('iAbstand',self.iAbstand)
-		self.params = roverparams.getParamFile()
+		#self.iAbstand = getiAbstand()
+		self.params = roverparams.getParamFile()		
 		#print('Rover Params', self.params)
+		self.iAbstand = self.params['iWert']
+		print('iAbstand',self.iAbstand)		
 		mqtt_test.mqttsend('params', json.dumps(self.params, indent=4))
 				
 	def getDirection(self, rStatic):

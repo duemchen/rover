@@ -30,6 +30,7 @@ def bearing16():
 def readCalibration():
 	b = bus.read_byte_data(i2c_address, calibReg)	
 	print('readCalibration:', bin(b),'winkel: ', bearing16()) 
+	return b
 	
 def storeCalibrationProfil():
 	# 0xF0, 0xF5, 0xF6

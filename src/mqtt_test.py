@@ -11,7 +11,7 @@ cmdtopic ='cmd'
 
 
 receiver = None
-test = 10
+test = 199
 
 def getMqttCmd():
 	global receiver

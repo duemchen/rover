@@ -4,11 +4,12 @@ import os.path
 
 filename = 'rover_params.json'
  
-def toParamFile(p,pmax,i,imax):
+def toParamFile(p,pmax,iw,imax):
 	# Data to be written
 	dictionary = {
 		"pWert": p,
 		"pMax": pmax,
+		"iWert": iw,
 		"iFaktor": i,
 		"iMax": imax,      
 	}
