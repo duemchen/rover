@@ -2,6 +2,6 @@
     "pWert": 70,
     "pMax": 100,
 	"iWert": 64,
-    "iFaktor": 0.3,
+    "iFaktor": 1.9,
     "iMax": 100
 }

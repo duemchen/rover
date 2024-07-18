@@ -28,6 +28,84 @@ import math
 import json
 
 
+def kreis():
+'''
+rechts rum im Kreis fahren
+stoppen
+cali lesen
+stop wenn calibriert
+'''
+	voltage.startVoltage()	
+	gps_thread_LatLonFix.startGPS()
+	time.sleep(2)
+	motor.setPower(90)
+	result = False
+	while True:
+		print("warten auf fix")
+		gps_thread_LatLonFix.event.clear()
+		gps_thread_LatLonFix.event.wait(10)
+		r = gps_thread_LatLonFix.getRoverPosition() 	
+		if r.fix != 0:
+			break
+	x=20	
+	for z in range(3): #3 Runden		
+		#break wenn kalib ok.
+		cal = compass_i2c.readCalibration()
+		sCal = str(bin(cal))
+		if sCal[-2:] == "11":
+			print("Kompass calibriert")
+			result = True
+			break			
+		motoren.stop()
+		time.sleep(0.5)
+		motoren.start()		
+		motoren.lenke(20,True) #rechts rum Kreis
+		time.sleep(x)
+		motoren.stop()
+	print("Kreis Kalibrierung ", result)
+
+	
+def winkeltest():
+'''
+strecke fahren a...b  
+winkel gps mit winkel Kompass vergleichen.
+Das ist der Offset I-Anteil
+'''
+	voltage.startVoltage()
+	gps_thread_LatLonFix.startGPS()	
+	time.sleep(2)
+	while True:
+		print("warten auf fix")
+		gps_thread_LatLonFix.event.clear()
+		gps_thread_LatLonFix.event.wait(10)
+		r = gps_thread_LatLonFix.getRoverPosition() 	
+		if r.fix != 0:
+			break	
+	motoren.stop()
+	time.sleep(0.5)
+	gps_thread_LatLonFix.event.clear()
+	gps_thread_LatLonFix.event.wait(10)
+	a = gps_thread_LatLonFix.getRoverPosition() 
+	bearing.startBearing()
+	motoren.start()	
+	i=180
+	bearing.setSollWinkel(i,True)		
+	time.sleep(3)
+	motoren.stop()
+	time.sleep(0.5)
+	gps_thread_LatLonFix.event.clear()
+	gps_thread_LatLonFix.event.wait(10)
+	b = gps_thread_LatLonFix.getRoverPosition() 
+	#von a nach b gefahren. Winkel bestimmen.
+	r = RoverStatic(a,b,a)		
+	gps = math.degrees(r.getLeitstrahlWinkel())
+	delta = gps-i
+	cal = compass_i2c.readCalibration()
+	sCal = str(bin(cal))
+	s=toJson(i,gps,delta,sCal)
+	print(s)
+	mqtt_test.mqttsend("winkeltest",s)
+	
 
 def vorrueck():
 	voltage.startVoltage()
