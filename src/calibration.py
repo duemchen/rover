@@ -29,16 +29,16 @@ import json
 
 
 def kreis():
-'''
-rechts rum im Kreis fahren
-stoppen
-cali lesen
-stop wenn calibriert
-'''
+	'''
+	rechts rum im Kreis fahren
+	stoppen
+	cali lesen
+	stop wenn calibriert
+	'''
 	voltage.startVoltage()	
 	gps_thread_LatLonFix.startGPS()
 	time.sleep(2)
-	motor.setPower(90)
+	motoren.setPower(90)
 	result = False
 	while True:
 		print("warten auf fix")
@@ -59,18 +59,18 @@ stop wenn calibriert
 		motoren.stop()
 		time.sleep(0.5)
 		motoren.start()		
-		motoren.lenke(20,True) #rechts rum Kreis
+		motoren.lenke(40,True) #rechts rum Kreis
 		time.sleep(x)
 		motoren.stop()
 	print("Kreis Kalibrierung ", result)
 
 	
 def winkeltest():
-'''
-strecke fahren a...b  
-winkel gps mit winkel Kompass vergleichen.
-Das ist der Offset I-Anteil
-'''
+	'''
+	strecke fahren a...b  
+	winkel gps mit winkel Kompass vergleichen.
+	Das ist der Offset I-Anteil
+	'''
 	voltage.startVoltage()
 	gps_thread_LatLonFix.startGPS()	
 	time.sleep(2)
@@ -90,7 +90,7 @@ Das ist der Offset I-Anteil
 	motoren.start()	
 	i=180
 	bearing.setSollWinkel(i,True)		
-	time.sleep(3)
+	time.sleep(5)
 	motoren.stop()
 	time.sleep(0.5)
 	gps_thread_LatLonFix.event.clear()
@@ -165,6 +165,8 @@ def toJson(compass,gps,delta, sCal):
 	return json.dumps({"compass": compass, "gps":round(gps,1),"delta": round(delta,1),"sensor":sCal})
 		
 #vorrueck()
+#kreis()
+winkeltest()
 
 '''
 s = "0b110100"

@@ -6,13 +6,13 @@ import math
 import json
 
 
-oa1 = 24
-oa2 = 23
-ena = 25
+ob2 = 24
+ob1 = 23
+enb = 25
 
-ob1 = 27
-ob2 = 17
-enb = 22
+oa2 = 27
+oa1 = 17
+ena = 22
  
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -193,23 +193,16 @@ def lenktest():
 	t=5
 	while True:
 		stop()
-		setPower(90)
+		setPower(70)
 		start()
 		lenke(0,True)
 		time.sleep(t)	
-		lenke(0,False)
-		time.sleep(t)	
 		lenke(30,True)
-		time.sleep(t)	
-		lenke(30,False)
 		time.sleep(t)	
 		lenke(0,True)
 		time.sleep(t)	
 		lenke(-30,True)
 		time.sleep(t)	
-		lenke(-30,False)
-		time.sleep(t)	
-		lenke(0,False)
 		stop()
 		time.sleep(t)	
 		time.sleep(t)	
@@ -219,6 +212,7 @@ def lenktest():
 		
 		
 #stoptest()
+
 #lenktest()
 #setRichtung(2)	
 #play()	
