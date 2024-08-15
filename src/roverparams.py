@@ -4,13 +4,13 @@ import os.path
 
 filename = 'rover_params.json'
  
-def toParamFile(p,pmax,iw,imax):
+def toParamFile(p,pmax,iw,iF,imax):
 	# Data to be written
 	dictionary = {
 		"pWert": p,
 		"pMax": pmax,
 		"iWert": iw,
-		"iFaktor": i,
+		"iFaktor": iF,
 		"iMax": imax,      
 	}
 	# Serializing json
@@ -31,15 +31,15 @@ def getParamFile():
 
 
 def test():
-#	toParamFile(1,2,3,4.5)
+#	toParamFile(1,2,3,4,5)
 #	print(getParamFile())
 	x=getParamFile()
-	print(x['pWert'],x['pMax'],x['iFaktor'],x['iMax'] )
+	print(x['pWert'],x['pMax'],x['iWert'],x['iFaktor'],x['iMax'] )
 	print(type(x))
 
 
 print(os.path.abspath(filename))	
 if not os.path.isfile(filename):
-	toParamFile(60,50,1,10)
+	toParamFile(60,50,1,5,10)
 
-#test()
+test()

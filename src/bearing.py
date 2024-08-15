@@ -7,6 +7,7 @@ import motoren
 import threading
 import json  
 import voltage
+import offset
 
 
 #bus = None
@@ -52,9 +53,11 @@ def server_bearing():
 	global soll,fahrtrichtung	
 	fahrtrichtung = True  # vorwärts true
 	motoren.stop()
+	offsetwinkel = offset.readOffset()
 	while True:	
 		time.sleep(0.1)
 		ist = compass_i2c.bearing16()
+		ist += offsetwinkel
 		ist = round(ist,1)
 		#mqtt_test.mqttsend('istwinkel', ist)
 		'''
