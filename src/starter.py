@@ -29,6 +29,7 @@ import math
 import sys
 import offset
 
+power = 95
 
 def getwinkeloffset():
 	a = gps_thread_LatLonFix.getRoverPosition() 
@@ -118,9 +119,14 @@ def test():
 			continue	
 		break;	
 
-	oval=getwinkeloffset() # 1 m fahren zwecks richtung
-	offset.writeOffset(oval)
+	ofs=getwinkeloffset() # 1 m fahren zwecks richtung
+	offset.writeOffset(ofs)
 	sys.exit()
+	
+	#den Meter zurück rückwärts
+	#zum startpunkt fahren
+	
+	
 
 	b = gps_thread_LatLonFix.getRoverPosition() 
 	kreiscalibierung(a,b) # todo zeitlich limitieren

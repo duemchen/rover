@@ -3,14 +3,18 @@ import mqtt_test
 import json  
 import time
 import roverparams
+import offset
 
 nahAbstand = 0.06 
 iAbstand = 65
+
+
 
 def saveiAbstand(ab):
 	global iAbstand
 	iAbstand = ab
 def getiAbstand	():
+	global iAbstand
 	return iAbstand
 
 
@@ -110,8 +114,8 @@ class RoverDynamic:
 		#self.iAbstand = getiAbstand()
 		self.params = roverparams.getParamFile()		
 		#print('Rover Params', self.params)
-		self.iAbstand = self.params['iWert']
-		print('iAbstand',self.iAbstand)		
+		self.iAbstand = offset.readOffset() #self.params['iWert']		
+		print('init iAbstand',self.iAbstand)		
 		mqtt_test.mqttsend('params', json.dumps(self.params, indent=4))
 				
 	def getDirection(self, rStatic):
@@ -158,13 +162,15 @@ class RoverDynamic:
 			saveiAbstand(self.iAbstand)
 			#leit wird korrigiert, um abstand zu verringern und 
 			# offset zwischen gps-Richtung und compass-Richtung auszugleichen
-			result = leit - pAbstandwinkel - self.iAbstand  #abstand links muss winkel vergrößern
+			result = leit - pAbstandwinkel + self.iAbstand  #abstand links muss winkel vergrößern
 			result = round(result,1)
 			while result > 360:
 				result -= 360
 			while result < 0:
 				result += 360
-			mqtt_test.mqttsend('sollvorgabe',self.getRoverSollvorgabe(leit,pAbstandwinkel,self.iAbstand,result))			
+			mqtt_test.mqttsend('sollvorgabe',self.getRoverSollvorgabe(leit,pAbstandwinkel,self.iAbstand,result))
+			offset.writeOffset(self.iAbstand) # nur schreiben weil nächstes Object beim Wenden generiert wird
+			print('iAbstand',self.iAbstand)
 		except  Exception as e:
 			print('error '+repr(e))
 		finally:			

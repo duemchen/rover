@@ -29,8 +29,15 @@ def bearing16():
 	
 def readCalibration():
 	b = bus.read_byte_data(i2c_address, calibReg)	
-	print('readCalibration:', bin(b),'winkel: ', bearing16()) 
-	return b
+	#print('readCalibration:', bin(b),'winkel: ', bearing16()) 
+	sCal = str(bin(b))
+	#if sCal[-2:] == "11":
+	#return bin(b)
+	return sCal[-2:]
+	
+#sCal = str(bin(cal))
+#if sCal[-2:] == "11":
+	
 	
 def storeCalibrationProfil():
 	# 0xF0, 0xF5, 0xF6

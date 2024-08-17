@@ -7,7 +7,7 @@ import motoren
 import threading
 import json  
 import voltage
-import offset
+#import offset
 
 
 #bus = None
@@ -28,6 +28,9 @@ soll = round(math.degrees(soll),1)
 '''
 
 def setSollWinkel(so,fr): 
+	'''
+	Sollwinkel aus den gps Messungen.
+	'''
 	global soll,fahrtrichtung
 	fahrtrichtung = fr
 	if fahrtrichtung:
@@ -53,11 +56,18 @@ def server_bearing():
 	global soll,fahrtrichtung	
 	fahrtrichtung = True  # vorwärts true
 	motoren.stop()
-	offsetwinkel = offset.readOffset()
+	#offsetwinkel = offset.readOffset()
+	#print('bearing.offsetwinkel:', offsetwinkel)
 	while True:	
 		time.sleep(0.1)
 		ist = compass_i2c.bearing16()
-		ist += offsetwinkel
+		#ist += offsetwinkel
+		while ist > 360: #wenn er positiv ist
+			ist -= 360
+		while ist < 0: #wenn er negativ ist
+			ist += 360
+			
+
 		ist = round(ist,1)
 		#mqtt_test.mqttsend('istwinkel', ist)
 		'''
