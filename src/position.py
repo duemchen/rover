@@ -155,6 +155,7 @@ class RoverDynamic:
 			#meter in einen Anteil wandeln, der zu einem I-Anteil addiert wird.
 			#10 cm = 0.10 m = 1 Grad
 			i = abstand * self.params['iFaktor'] # meter in gradschritte
+			i=0
 			self.iAbstand += i
 			self.iAbstand = max(-self.params['iMax'],self.iAbstand)
 			self.iAbstand = min(self.params['iMax'],self.iAbstand)

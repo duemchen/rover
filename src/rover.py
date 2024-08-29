@@ -10,7 +10,11 @@ import bearing
 import starter
 import offset
 import sys
+import area
 
+are = area.prepare() # die fläche wird berechnet
+area.sendmap(are)
+area.resetIst() #
 voltage.startVoltage()
 #bearing.startBearing() #erst nach calibrierung starten
 
@@ -29,11 +33,16 @@ while True:
 	if a.fix == 0:
 		print('no fix.', i)			
 		i+=1
+		#area.addIstAndSend(Position(i,-i,0))
 		continue	
 	break;	
-#sys.exit()	
+	
+#sys.exit()
+
 ofs=starter.getwinkeloffset() # 1 m fahren zwecks richtung
 offset.writeOffset(ofs) #offset eintragen in ini für bearing oder position
+print('ofs',ofs)
+#sys.exit()	
 #offset ist der I-Regler Anfangswert, der weiter angepasste werden muss, falls der compass umcalibriert !!!
 b = a # die erste Startposition wird der neue Zielpunkt
 a = gps_thread_LatLonFix.getRoverPosition() #die aktuelle Position
@@ -47,6 +56,7 @@ motoren.stop()
 mqtt_test.mqttsend('cmd','start')
 fahrtrichtung = True 
 fahrtrichtung = False #rückwärts zum ErstStartPunkt 
+#a,b = are.getNextSection()
 while True:
 	#time.sleep(0.5)
 	mqtt_test.mqttsend('compass',compass_i2c.readCalibration())	
@@ -67,8 +77,10 @@ while True:
 	if r.fix == 0:
 		print('no fix.')	
 		motoren.stop()
-		continue	
-	if (rs.getRestweg() < 0.10):
+		continue
+	#GPS hat neue Position gelesen
+	area.addIstAndSend(r)
+	if (rs.getRestweg() < 0.05):
 		# nächsten FahrtAbschnitt einspielen
 		print('wenden.')	
 		motoren.stop()
@@ -77,6 +89,11 @@ while True:
 		b=x
 		rd = RoverDynamic()
 		fahrtrichtung = not fahrtrichtung
+		a,b = are.getNextSection()
+		if a==None or b==None:
+			print('Ziel erreicht.')
+			break	
+		print('{: >6}'.format(a.x),'{: >6}'.format(a.y),'->','{: >6}'.format(b.x),'{: >6}'.format(b.y))
 		continue
 	# Action
 	print('Rover moves'+ basisstation.getPositionJson(r))

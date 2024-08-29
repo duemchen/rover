@@ -3,7 +3,7 @@
 # i2cdetect -y 1  (0,2)
 # sudo apt-get install python-smbus 
 # pip install smbus # 2 --break-system-packages
-
+ 
 import smbus
 import time
 
@@ -16,7 +16,7 @@ calibReg = 0x1E
 def bearing8():
 	b = bus.read_byte_data(i2c_address, bear8Reg)	
 	b = round((360 * b / 255),1)
-	return b
+	return (b)
 	
 def bearing16():	
 	b = bus.read_i2c_block_data(i2c_address, bear16Reg, 2)
@@ -24,7 +24,15 @@ def bearing16():
 	y = b[1] #*1.0
 	z = x*256 + y
 	z =  z/10 
-	return z
+	return (z)
+
+def korrektur(winkel):
+	# Kompass zeigt nach hinten. Deshalb drehen.
+	winkel += 180
+	while winkel > 360:
+		winkel -=360
+	winkel=round(winkel,1)	
+	return winkel
 	
 	
 def readCalibration():
@@ -60,8 +68,10 @@ def delCalibrationProfil():
 	time.sleep(0.02)
 
 def test():	
+	i=0
 	while True:	
-		print('bearing: ', bearing8(),' genau: ',bearing16())
+		i+=1
+		print('bearing: ', bearing8(),' genau: ',bearing16(),'    ',i)
 		time.sleep(0.1)
 		
 def showcalib():
