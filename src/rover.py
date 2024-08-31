@@ -55,7 +55,7 @@ rd = RoverDynamic()
 motoren.stop()
 mqtt_test.mqttsend('cmd','start')
 fahrtrichtung = True 
-fahrtrichtung = False #rückwärts zum ErstStartPunkt 
+# bei nextsectionPaar fahrtrichtung = False #rückwärts zum ErstStartPunkt 
 #a,b = are.getNextSection()
 while True:
 	#time.sleep(0.5)
@@ -88,8 +88,8 @@ while True:
 		a=b
 		b=x
 		rd = RoverDynamic()
-		fahrtrichtung = not fahrtrichtung
-		a,b = are.getNextSection()
+		#fahrtrichtung = not fahrtrichtung
+		a,b = are.getNextSectionPaar() #getNextSectionEinzelPaar()
 		if a==None or b==None:
 			print('Ziel erreicht.')
 			break	
@@ -98,7 +98,7 @@ while True:
 	# Action
 	print('Rover moves'+ basisstation.getPositionJson(r))
 	#motoren.setForward()
-	motoren.setPower(95)
+	motoren.setPower(100)
 	motoren.start()	
 	#v = rs.getLenkrichtung()
 	alpha = rd.getLenkrichtungDynamisch(rs) # hier wird per gps die cm-genaue absolute istbewegung gemessen und daraus der neue sollwinkel berechnet

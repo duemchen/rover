@@ -71,7 +71,7 @@ def test():
 	i=0
 	while True:	
 		i+=1
-		print('bearing: ', bearing8(),' genau: ',bearing16(),'    ',i)
+		print('bearing: ', bearing8(),' genau: ',bearing16(),'magCal:',readCalibration(),'    ',i)
 		time.sleep(0.1)
 		
 def showcalib():

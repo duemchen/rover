@@ -155,9 +155,24 @@ class area:
 	def getPattern(self):
 		return self.__pattern
 		
-	def getNextSection(self):
+	def getNextSectionPaar(self):
+		''' das nächste Paar '''
 		result = []
 		self.pos +=1
+		if self.pos > len(self.__pattern)-1:
+			return None,None
+		result.append(self.__pattern[self.pos])	
+		self.pos +=1
+		if self.pos > len(self.__pattern)-1:
+			return None,None
+		result.append(self.__pattern[self.pos])			
+		return result[0],result[1]
+
+	def getNextSectionEinzel(self):
+		''' letzer Punkt bis zum nächsten '''
+		result = []
+		if self.pos == -1:
+			self.pos +=1
 		if self.pos > len(self.__pattern)-1:
 			return None,None
 		result.append(self.__pattern[self.pos])	
@@ -237,7 +252,7 @@ def getJsonMap(p):
 def sendmap(myarea):
 	#map = prepare()
 	s =  getJsonMap(myarea.getPattern())
-	print('s\n',s)
+	#print('s\n',s)
 	mqtt_test.mqttsend('map/soll',s)	
 	#arr = json.loads(s)
 	#print('loads\n', arr[0])	
@@ -261,7 +276,7 @@ def addIstAndSend(pos):
 	ist.append(pos)
 	print(ist)
 	s =  getJsonMap(ist)
-	print('s\n',s)
+	#print('s\n',s)
 	mqtt_test.mqttsend('map/ist',s)	
 
 def testist():

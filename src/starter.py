@@ -57,6 +57,8 @@ def getwinkeloffset():
 	winkelgps = round(math.degrees(winkelgps),1)
 	winkelcompass = compass_i2c.bearing16()
 	result = round(winkelcompass - winkelgps,1)
+	while result < 0:
+		result+=360	#immer positiven Winkel erzeugen
 	print('gps:',winkelgps,', compass:',winkelcompass,', result:',result)
 	return result
 

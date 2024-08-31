@@ -154,13 +154,17 @@ class RoverDynamic:
 			pAbstandwinkel = round(pAbstandwinkel,1)
 			#meter in einen Anteil wandeln, der zu einem I-Anteil addiert wird.
 			#10 cm = 0.10 m = 1 Grad
-			i = abstand * self.params['iFaktor'] # meter in gradschritte
-			i=0
-			self.iAbstand += i
-			self.iAbstand = max(-self.params['iMax'],self.iAbstand)
-			self.iAbstand = min(self.params['iMax'],self.iAbstand)
-			self.iAbstand = round(self.iAbstand,2)
-			saveiAbstand(self.iAbstand)
+			if abstand < 0.1: # nur Feinjustierung
+				i = abstand * self.params['iFaktor'] # meter in gradschritte
+				#i=0
+				self.iAbstand += -i
+				self.iAbstand = round(self.iAbstand,5)
+			#
+			#self.iAbstand = max(-self.params['iMax'],self.iAbstand)
+			#self.iAbstand = min(self.params['iMax'],self.iAbstand)
+			#self.iAbstand = round(self.iAbstand,2)
+			#saveiAbstand(self.iAbstand)
+			#
 			#leit wird korrigiert, um abstand zu verringern und 
 			# offset zwischen gps-Richtung und compass-Richtung auszugleichen
 			result = leit - pAbstandwinkel + self.iAbstand  #abstand links muss winkel vergrößern
@@ -171,7 +175,7 @@ class RoverDynamic:
 				result += 360
 			mqtt_test.mqttsend('sollvorgabe',self.getRoverSollvorgabe(leit,pAbstandwinkel,self.iAbstand,result))
 			offset.writeOffset(self.iAbstand) # nur schreiben weil nächstes Object beim Wenden generiert wird
-			print('iAbstand',self.iAbstand)
+			print('Abstand:',abstand,'offset:',self.iAbstand)
 		except  Exception as e:
 			print('error '+repr(e))
 		finally:			
