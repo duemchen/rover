@@ -9,6 +9,8 @@
 
 import smbus
 import time
+import sys
+import mqtt_test
 
 bus = smbus.SMBus(1)    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
 i2c_address = 0x58
@@ -17,6 +19,8 @@ modeReg = 15
 mode = 3 # beide motoren geschwindigkeit M1, turn M2
 speedReg = 0
 turnReg = 1
+
+speed = 100
 
 class Antrieb:
 	""" M25 2 Rad Antrieb """
@@ -48,18 +52,40 @@ class Antrieb:
 	def getVoltage(self):	
 		result = self.bus.read_byte_data(i2c_address, self.batteryReg)
 		result = round( result/10, 2)
-		print('Spannung: ', result)
-		return result
+		#print('Spannung: ', result)
+		return str(result) #+' V'
 			
-
+	def lenke(self,turn,fahrtrichtung):
+		global speed
+		if fahrtrichtung:
+			self.setSpeed(speed)
+		else:
+			self.setSpeed(-speed)
+		self.setTurn(turn)	
 
 # 
 def testlauf():
+	x=2
+	
 	a = Antrieb()
-	#a.motorStopAutomatic(False)
+	print(a.getVoltage())
+	mqtt_test.mqttsend('voltage', a.getVoltage())
+	a.motorStopAutomatic(not False)
+	
+	print('lenke vorwärts')
+	a.lenke(0,True)
+	time.sleep(x)
+	print('lenke rückwärts')
+	a.lenke(0,False)
+	time.sleep(x)
+	
+	sys.exit()
+	
+	
+	
 	a.setTurn(0)	
-	a.setSpeed(35)
-	x=5
+	a.setSpeed(50)
+	
 	print('vorwärts')
 	time.sleep(x)
 	
@@ -83,7 +109,7 @@ def testlauf():
 	print('stop')
 	time.sleep(x)
 
-#testlauf()
+testlauf()
 #a = Antrieb()
 #print(a.getVoltage())
 #a.motorStopAutomatic(True)

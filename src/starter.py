@@ -18,11 +18,12 @@ Drehung Richtung Startbahn
 
 import time
 import mqtt_test
-import voltage
+#import voltage
 import basisstation
 import gps_thread_LatLonFix
 from position import Position,RoverStatic,RoverDynamic
-import motoren
+#import motoren
+import antrieb_i2c as antrieb
 import compass_i2c
 import bearing 
 import math
@@ -33,11 +34,15 @@ power = 95
 
 def getwinkeloffset():
 	a = gps_thread_LatLonFix.getRoverPosition() 
-	motoren.setPower(power)
-	motoren.start()	
-	motoren.lenke(0,True)
+	#motoren.setPower(power)
+	#motoren.start()	
+	#motoren.lenke(0,True)
+	drive = antrieb.Antrieb()
+	drive.setSpeed(power)
+	drive.setTurn(0) #gerade
 	#fahren geradeaus ca. 1m weiter 
 	while True:
+		drive.setTurn(0)
 		gps_thread_LatLonFix.event.wait(10)
 		gps_thread_LatLonFix.event.clear()
 		b = gps_thread_LatLonFix.getRoverPosition() 
@@ -46,7 +51,8 @@ def getwinkeloffset():
 		print('Weg:',weg)
 		if weg > 1: 
 			break
-	motoren.stop()	
+	#motoren.stop()	
+	drive.setSpeed(0)
 	time.sleep(0.2)
 	gps_thread_LatLonFix.event.wait(10)
 	gps_thread_LatLonFix.event.clear()
@@ -104,7 +110,7 @@ def kreiscalibierung(a,b):
 
 def test():
 	global power
-	voltage.startVoltage()
+	#voltage.startVoltage()
 	#bearing.startBearing()
 	gps_thread_LatLonFix.startGPS()
 	time.sleep(2)
@@ -118,7 +124,7 @@ def test():
 		if a.fix == 0:
 			print('no fix.', i)			
 			i+=1
-			continue	
+			#continue	
 		break;	
 
 	ofs=getwinkeloffset() # 1 m fahren zwecks richtung
@@ -139,4 +145,4 @@ def test():
 	#time.sleep(0.2)
 	#sys.exit()
 
-#test()
+test()

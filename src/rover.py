@@ -4,7 +4,8 @@ import voltage
 import basisstation
 import gps_thread_LatLonFix
 from position import Position,RoverStatic,RoverDynamic
-import motoren
+#import motoren
+import antrieb_i2c as antrieb
 import compass_i2c
 import bearing 
 import starter
@@ -15,7 +16,7 @@ import area
 are = area.prepare() # die fläche wird berechnet
 area.sendmap(are)
 area.resetIst() #
-voltage.startVoltage()
+#voltage.startVoltage()
 #bearing.startBearing() #erst nach calibrierung starten
 
 gps_thread_LatLonFix.startGPS()
@@ -52,7 +53,9 @@ bearing.startBearing() #erst nach calibrierung starten
 #a = Position(3.31,-31.5,1)	  
 #b = Position(-0.24,-41.33,1)
 rd = RoverDynamic()
-motoren.stop()
+#motoren.stop()
+drive = antrieb.Antrieb()
+
 mqtt_test.mqttsend('cmd','start')
 fahrtrichtung = True 
 # bei nextsectionPaar fahrtrichtung = False #rückwärts zum ErstStartPunkt 
@@ -70,20 +73,23 @@ while True:
 	mqtt_test.mqttsend('gps',basisstation.getPositionJson(r))	
 	if(cmd!='start'):
 		print('Rover stop')
-		motoren.stop()
+		#motoren.stop()
+		drive.setSpeed(0)
 		continue
 	
 	
 	if r.fix == 0:
 		print('no fix.')	
-		motoren.stop()
+		#motoren.stop()
+		drive.setSpeed(0)
 		continue
 	#GPS hat neue Position gelesen
 	area.addIstAndSend(r)
 	if (rs.getRestweg() < 0.05):
 		# nächsten FahrtAbschnitt einspielen
 		print('wenden.')	
-		motoren.stop()
+		#motoren.stop()
+		drive.setSpeed(0)
 		x=a
 		a=b
 		b=x
@@ -98,9 +104,10 @@ while True:
 	# Action
 	print('Rover moves'+ basisstation.getPositionJson(r))
 	#motoren.setForward()
-	motoren.setPower(100)
-	motoren.start()	
+	#motoren.setPower(100)
+	#motoren.start()	
 	#v = rs.getLenkrichtung()
+	drive.setSpeed(100)
 	alpha = rd.getLenkrichtungDynamisch(rs) # hier wird per gps die cm-genaue absolute istbewegung gemessen und daraus der neue sollwinkel berechnet
 	bearing.setSollWinkel(alpha,fahrtrichtung) # hier wird per compass schnell und genau eine richtung geregelt
 	

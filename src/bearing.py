@@ -3,10 +3,11 @@ import compass_i2c
 import math
 import time
 import mqtt_test
-import motoren 
+#import motoren 
+import antrieb_i2c as antrieb
 import threading
 import json  
-import voltage
+#import voltage
 #import offset
 
 
@@ -55,7 +56,8 @@ def getBearingJson(soll, ist, delta):
 def server_bearing():
 	global soll,fahrtrichtung	
 	fahrtrichtung = True  # vorwärts true
-	motoren.stop()
+	drive = antrieb.Antrieb()
+	#motoren.stop()
 	#offsetwinkel = offset.readOffset()
 	#print('bearing.offsetwinkel:', offsetwinkel)
 	while True:	
@@ -103,7 +105,8 @@ def server_bearing():
 		delta *= P_FAKTOR
 		delta = round(delta,1)
 		mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))
-		motoren.lenke(-delta,fahrtrichtung)
+		#motoren.lenke(-delta,fahrtrichtung)
+		drive.lenke(-delta,fahrtrichtung)
 		
 		
 
