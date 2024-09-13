@@ -182,7 +182,9 @@ class area:
 		result.append(self.__pattern[self.pos])			
 		return result[0],result[1]
 		
-	
+	def getFirstPoint(self):
+		result = self.__pattern[0]
+		return result
 		
 		'''
 			die punkte sind so in der rechten reihenfolge, der rover muss immer 2 zu einer strecke machen am wendepunkt
@@ -274,7 +276,7 @@ def addIstAndSend(pos):
 	wenn die Datensendung zu groß ist.
 	'''
 	ist.append(pos)
-	print(ist)
+	#print(ist)
 	s =  getJsonMap(ist)
 	#print('s\n',s)
 	mqtt_test.mqttsend('map/ist',s)	

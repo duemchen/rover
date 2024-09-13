@@ -1,6 +1,6 @@
 import time
 import mqtt_test
-import voltage
+#import voltage
 import basisstation
 import gps_thread_LatLonFix
 from position import Position,RoverStatic,RoverDynamic
@@ -30,12 +30,12 @@ while True:
 
 	gps_thread_LatLonFix.event.wait(10)
 	gps_thread_LatLonFix.event.clear()
-	a = gps_thread_LatLonFix.getRoverPosition() 
+	a = gps_thread_LatLonFix.getRoverPosition() 	
 	if a.fix == 0:
 		print('no fix.', i)			
 		i+=1
 		#area.addIstAndSend(Position(i,-i,0))
-		continue	
+		continue			
 	break;	
 	
 #sys.exit()
@@ -43,11 +43,15 @@ while True:
 ofs=starter.getwinkeloffset() # 1 m fahren zwecks richtung
 offset.writeOffset(ofs) #offset eintragen in ini für bearing oder position
 print('ofs',ofs)
-#sys.exit()	
+
+#time.sleep(1)
+#sys.exit()
+
 #offset ist der I-Regler Anfangswert, der weiter angepasste werden muss, falls der compass umcalibriert !!!
 b = a # die erste Startposition wird der neue Zielpunkt
 a = gps_thread_LatLonFix.getRoverPosition() #die aktuelle Position
-#sys.exit()
+area.addIstAndSend(a)
+
 #offset ende
 bearing.startBearing() #erst nach calibrierung starten
 #a = Position(3.31,-31.5,1)	  
@@ -55,6 +59,11 @@ bearing.startBearing() #erst nach calibrierung starten
 rd = RoverDynamic()
 #motoren.stop()
 drive = antrieb.Antrieb()
+b = are.getFirstPoint() # zum Startpunkt der Fläche
+
+#time.sleep(1)
+#sys.exit()
+
 
 mqtt_test.mqttsend('cmd','start')
 fahrtrichtung = True 
@@ -107,7 +116,11 @@ while True:
 	#motoren.setPower(100)
 	#motoren.start()	
 	#v = rs.getLenkrichtung()
-	drive.setSpeed(100)
+	#drive.setSpeed(100)
+	if (rs.getRestweg() < 0.20):
+		antrieb.speed = 90
+    else:
+		antrieb.speed = 127		
 	alpha = rd.getLenkrichtungDynamisch(rs) # hier wird per gps die cm-genaue absolute istbewegung gemessen und daraus der neue sollwinkel berechnet
 	bearing.setSollWinkel(alpha,fahrtrichtung) # hier wird per compass schnell und genau eine richtung geregelt
 	

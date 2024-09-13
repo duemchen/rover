@@ -47,7 +47,7 @@ class Antrieb:
 		self.bus.write_byte_data(i2c_address, speedReg, speed)
 
 	def setTurn(self, turn):  # -128...0...127
-		self.bus.write_byte_data(i2c_address, turnReg, turn)
+		self.bus.write_byte_data(i2c_address, turnReg, int(turn))
 	
 	def getVoltage(self):	
 		result = self.bus.read_byte_data(i2c_address, self.batteryReg)
@@ -59,9 +59,11 @@ class Antrieb:
 		global speed
 		if fahrtrichtung:
 			self.setSpeed(speed)
+			self.setTurn(turn)	
 		else:
 			self.setSpeed(-speed)
-		self.setTurn(turn)	
+			self.setTurn(-turn)	
+		
 
 # 
 def testlauf():
@@ -109,7 +111,7 @@ def testlauf():
 	print('stop')
 	time.sleep(x)
 
-testlauf()
+#testlauf()
 #a = Antrieb()
 #print(a.getVoltage())
 #a.motorStopAutomatic(True)

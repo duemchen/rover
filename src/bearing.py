@@ -37,9 +37,11 @@ def setSollWinkel(so,fr):
 	if fahrtrichtung:
 		soll = so
 	else:	
-		so = so + 180
-		if so >= 360:
+		so = so + 180  # ziel mit hinten anvisieren, also um 180 grad gedreht
+		while so >= 360: #wenn er positiv ist
 			so -= 360
+		while so < 0: #wenn er negativ ist
+			so += 360
 		soll = so
 	
 def setMotor(v):
@@ -63,15 +65,14 @@ def server_bearing():
 	while True:	
 		time.sleep(0.1)
 		ist = compass_i2c.bearing16()
+		if not fahrtrichtung:
+			ist += 180  #ziel von hinten anvisieren
 		#ist += offsetwinkel
-		while ist > 360: #wenn er positiv ist
+		while ist >= 360: #wenn er positiv ist
 			ist -= 360
 		while ist < 0: #wenn er negativ ist
 			ist += 360
-			
-
 		ist = round(ist,1)
-		#mqtt_test.mqttsend('istwinkel', ist)
 		'''
 		 1-20= -19
 		 0-20= -20
@@ -84,6 +85,9 @@ def server_bearing():
 		 360 - 350 = 10
 		 0 - 350  = - 350  +360 = -10
 		 
+		wenn der winkel sich abrupt ändert, muss er von der alten in die neue posiion drehen.
+		sonderfall komplett um 180 grad dann wäre es egal, ob rehcts oder linksherum,
+		normal immer nur den kleineren dreh wählen, also immer unter 180
 		
 		'''
 		delta = ist - soll
@@ -107,8 +111,6 @@ def server_bearing():
 		mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))
 		#motoren.lenke(-delta,fahrtrichtung)
 		drive.lenke(-delta,fahrtrichtung)
-		
-		
 
 def startBearing():
 	# Initialize the thread with the server_status function as its target
@@ -137,15 +139,17 @@ def run_server():
 		time.sleep(0.1)
 
 def run_vorrueck():
-	voltage.startVoltage()
+	#voltage.startVoltage()
 	fahrtrichtung = True
 	setSollWinkel(199,fahrtrichtung)
 	startBearing()
-	setMotor(90)
-	motoren.start()	
+	#setMotor(90)
+	#motoren.start()	
+	#antrieb.speed=127
+	print(antrieb.speed) 
 	
 	"""Simulated function for server main loop."""
-	x=3
+	x=5
 	y=0
 	while True:
 		print(y)
@@ -155,11 +159,22 @@ def run_vorrueck():
 		time.sleep(x)
 		y += 45
 
-
+def run_drehen():
+	print(antrieb.speed) 
+	antrieb.speed = 0 
+	print(antrieb.speed) 
+	startBearing()
+	x=7	
+	winkel = [0,90,180,0]
+	for y in winkel:	
+		#antrieb.speed = 0 
+		print(y)
+		setSollWinkel(y,False)
+		time.sleep(x)
 		
 #run_server()
 #run_vorrueck()
-
+#run_drehen()
 '''
 Lenkung sorgt für die Einhaltung einer Sollrichtung (Himmelsrichtung)
 Sollwinkel einhalten, also sehr gerade fahren und sofort reagieren

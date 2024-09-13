@@ -33,6 +33,7 @@ import offset
 power = 95
 
 def getwinkeloffset():
+	global power
 	a = gps_thread_LatLonFix.getRoverPosition() 
 	#motoren.setPower(power)
 	#motoren.start()	
@@ -124,7 +125,7 @@ def test():
 		if a.fix == 0:
 			print('no fix.', i)			
 			i+=1
-			#continue	
+			continue	
 		break;	
 
 	ofs=getwinkeloffset() # 1 m fahren zwecks richtung
@@ -145,4 +146,4 @@ def test():
 	#time.sleep(0.2)
 	#sys.exit()
 
-test()
+#test()
