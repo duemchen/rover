@@ -21,6 +21,14 @@ speedReg = 0
 turnReg = 1
 
 speed = 80
+slowSpeed = speed
+slowEnd = time.time() - 1 # bis dahin langsam fahren
+
+def setSlow(sekunden,speed):
+	global slowEnd,slowSpeed
+	slowEnd = time.time() + sekunden
+	slowSpeed = speed
+	
 
 class Antrieb:
 	""" M25 2 Rad Antrieb """
@@ -56,8 +64,13 @@ class Antrieb:
 		return str(result) #+' V'
 			
 	def lenke(self,turn,fahrtrichtung):
-		global speed
-		spee = speed
+		global speed,slowSpeed,slowEnd		
+		#speed absenken für einige sekunden
+		if time.time() < slowEnd:
+			spee = slowSpeed
+		else: 
+			spee = speed
+		
 		if fahrtrichtung:
 			spee = spee
 		else:
@@ -71,7 +84,10 @@ class Antrieb:
 		spee = max(-128,spee)
 		#print('spee',spee)
 		self.setSpeed(spee)
-		self.setTurn(turn)	# turn dreht selbst wenn spee negativ ist.
+		if spee == 0:
+			self.setTurn(0) # im Stand nicht drehen. Sondern dann ausdrücklich mindestens speed 1 oder -1 
+		else: 
+			self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.
 
 # 
 def testlauf():

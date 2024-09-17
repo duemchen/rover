@@ -54,15 +54,45 @@ def setMotor(v):
 def getBearingJson(soll, ist, delta):
 		return json.dumps({"soll": round(soll,1),"ist": round(ist,1),"delta": round(delta,1)})
 			
+			
+startzeit = None
+minzeit = 100
+maxzeit = 0
+mitzeit = None
+			
+def zeitmessung():
+	global startzeit,minzeit,maxzeit,mitzeit
+	if startzeit==None:
+		startzeit = time.perf_counter()
+		return
+	endzeit = time.perf_counter()
+	dauer = endzeit-startzeit
+	startzeit = endzeit
+	minzeit = min(minzeit,dauer)
+	maxzeit = max(maxzeit,dauer)
+	umfang = 100
+	if mitzeit==None:
+		mitzeit = dauer
+	mitzeit = (umfang * mitzeit + dauer)/(umfang+1)
+	
+def getZeitmessungJson():
+	global minzeit,maxzeit,mitzeit
+	if mitzeit != None:  
+		return json.dumps({"mittel": round(mitzeit,2),"min": round(minzeit,2),"max": round(maxzeit,2)})
 
+nexttimeBearing = 0
+nexttimeVoltage = 0
+	
 def server_bearing():
-	global soll,fahrtrichtung	
+	global soll,fahrtrichtung,nexttimeBearing,nexttimeVoltage
 	fahrtrichtung = True  # vorwärts true
 	drive = antrieb.Antrieb()
 	#motoren.stop()
 	#offsetwinkel = offset.readOffset()
-	#print('bearing.offsetwinkel:', offsetwinkel)
-	while True:	
+	#print('bearing.offsetwinkel:', offsetwinkel)	
+	while True:
+		zeitmessung()
+		startzeit = time.perf_counter()	
 		time.sleep(0.1)
 		ist = compass_i2c.bearing16()
 		#ist += offsetwinkel
@@ -72,39 +102,26 @@ def server_bearing():
 		#	ist += 360
 		ist = round(ist,1)
 		'''
-		 1-20= -19
-		 0-20= -20
-		 360-20 = 340  340 == -20  340 - 360 = -20
-		 
-		 180+20 = 200   >200 dann -=360
-		 delta > (180 + soll) dann delta -=360
-		 
-		 
-		 360 - 350 = 10
-		 0 - 350  = - 350  +360 = -10
-		 
-		wenn der winkel sich abrupt ändert, muss er von der alten in die neue posiion drehen.
-		sonderfall komplett um 180 grad dann wäre es egal, ob rehcts oder linksherum,
 		normal immer nur den kleineren dreh wählen, also immer unter 180
-		
 		'''
 		delta = ist - soll
-		
 		if delta > 180:
 			delta -= 360
 		if delta < -180:
 			delta += 360
-		
-		#delta = int(delta)
 		delta = round(delta,1)
-		#mqtt_test.mqttsend('deltawinkel', delta)
 		# delta positiv zu weit rechts (also nach links lenken)
 		delta *= P_FAKTOR
 		delta = round(delta,1)
-		mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))
-		#print(soll,ist,delta)
-		#motoren.lenke(-delta,fahrtrichtung)
 		drive.lenke(-delta,fahrtrichtung)
+		#entlastende seltene Aktionen
+		if(time.time() > nexttimeBearing):
+			mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))			
+			nexttimeBearing = time.time() + 3
+		if(time.time() > nexttimeVoltage):
+			nexttimeVoltage = time.time() + 6
+			mqtt_test.mqttsend('voltage', drive.getVoltage())
+			mqtt_test.mqttsend('bearingTiming',getZeitmessungJson())
 
 def startBearing():
 	# Initialize the thread with the server_status function as its target
