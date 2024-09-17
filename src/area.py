@@ -25,6 +25,7 @@ import math
 import json
 import mqtt_test
 import time
+import random
 print('area')
 
 
@@ -185,6 +186,8 @@ class area:
 	def getFirstPoint(self):
 		result = self.__pattern[0]
 		return result
+	def reset(self):
+		self.pos = -1
 		
 		'''
 			die punkte sind so in der rechten reihenfolge, der rover muss immer 2 zu einer strecke machen am wendepunkt
@@ -192,6 +195,48 @@ class area:
 			bis punkt ... gefahren  laufende nummer der liste
 		'''
 
+	def mapnow(self,A,alpha):
+
+		'''
+		Fahrzeug in eine Richtung stellen 
+		vorne und rechts soll genügend Platz sein!
+
+		Am Startpunkt 1 m fahren zwecks compassOffset
+		ABCD berechnen aus Richtung, Länge und Breite
+		Dann gleich weiterfahren zum Punkt B,C,D und zurück zu A und das als ist ausgeben
+		'''	
+		soll = []	
+		#
+		
+		length = 2 #Meter
+		width = 1
+		#
+		
+		B = Position(0,0,1)
+		B.x = A.x + length * math.cos(math.radians(90-alpha))
+		B.y = A.y + length * math.sin(math.radians(90-alpha))	
+		D = Position(0,0,1)
+		D.x = A.x + width * math.sin(math.radians(90-alpha))
+		D.y = A.y - width * math.cos(math.radians(90-alpha))
+		C = Position(0,0,1)
+		C.x = D.x + length * math.cos(math.radians(90-alpha))
+		C.y = D.y + length * math.sin(math.radians(90-alpha))	
+		A.round()
+		B.round()
+		C.round()
+		D.round()
+		soll.append(A)
+		soll.append(B)
+		soll.append(C)
+		soll.append(D)
+		soll.append(A)
+		s =  getJsonMap(soll)	
+		mqtt_test.mqttsend('map/soll',s)
+		self.__pattern.clear()
+		self.__pattern.extend(soll)		
+
+
+		
 
 		
 def prepare():	
@@ -245,7 +290,7 @@ def getJsonMap(p):
 	li = []
 	li.append(xx)
 	li.append(yy)
-	print('li\n',li)
+	#print('li\n',li)
 	result = json.dumps(li)
 	return result
 	
@@ -281,15 +326,26 @@ def addIstAndSend(pos):
 	#print('s\n',s)
 	mqtt_test.mqttsend('map/ist',s)	
 
+	
 def testist():
 	resetIst()
-	for i in (1,2,3,4):
-		addIstAndSend(Position(i,i,0))
-		time.sleep(2)
+	for i in (1,2,3,4,5,6):
+		addIstAndSend(Position(random.randint(-1, 4),random.randint(-40, -30),0))
+		time.sleep(1)
+
 
 	
-
-
+def mapnowtest():
+	are = prepare()
+	resetIst()
+	A =  Position(0.0,0.0,1)
+	alpha = 20  #grad
+	are.mapnow(A,alpha)
+	sendmap(are)
+		
+if __name__ == "__main__":
+	#testist()
+	mapnowtest()
 		
 '''
 {

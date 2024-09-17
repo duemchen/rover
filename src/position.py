@@ -25,7 +25,9 @@ class Position:
 		self.y=lat
 		self.fix=fix
 		#print('a: ' + str(self.x) + ', ' + str(self.y)+ ', ' + str(self.fix))
-	  
+	def round(self):
+		self.x=round(self.x,2);
+		self.y=round(self.y,2);
 	  
 	  
 class RoverStatic:
@@ -167,12 +169,12 @@ class RoverDynamic:
 			#
 			#leit wird korrigiert, um abstand zu verringern und 
 			# offset zwischen gps-Richtung und compass-Richtung auszugleichen
-			result = leit - pAbstandwinkel + self.iAbstand  #abstand links muss winkel vergrößern
-			result = round(result,1)
+			result = leit - pAbstandwinkel + self.iAbstand  #abstand links muss winkel vergrößern			
 			while result > 360:
 				result -= 360
 			while result < 0:
 				result += 360
+			result = round(result,1)
 			mqtt_test.mqttsend('sollvorgabe',self.getRoverSollvorgabe(leit,pAbstandwinkel,self.iAbstand,result))
 			offset.writeOffset(self.iAbstand) # nur schreiben weil nächstes Object beim Wenden generiert wird
 			print('Abstand:',abstand,'offset:',self.iAbstand)

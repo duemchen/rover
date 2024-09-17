@@ -20,7 +20,7 @@ mode = 3 # beide motoren geschwindigkeit M1, turn M2
 speedReg = 0
 turnReg = 1
 
-speed = 100
+speed = 80
 
 class Antrieb:
 	""" M25 2 Rad Antrieb """
@@ -44,7 +44,7 @@ class Antrieb:
 			self.bus.write_byte_data(i2c_address, self.cmdReg, 50)				
 			
 	def setSpeed(self, speed): # -128...0...127
-		self.bus.write_byte_data(i2c_address, speedReg, speed)
+		self.bus.write_byte_data(i2c_address, speedReg, int(speed))
 
 	def setTurn(self, turn):  # -128...0...127
 		self.bus.write_byte_data(i2c_address, turnReg, int(turn))
@@ -57,17 +57,33 @@ class Antrieb:
 			
 	def lenke(self,turn,fahrtrichtung):
 		global speed
+		spee = speed
 		if fahrtrichtung:
-			self.setSpeed(speed)
-			self.setTurn(turn)	
+			spee = spee
 		else:
-			self.setSpeed(-speed)
-			self.setTurn(-turn)	
-		
+			spee = -spee
+			turn = -turn
+			
+		turn = min(127,turn)
+		turn = max(-128,turn)
+		#print('turn',turn)
+		spee = min(127,spee)
+		spee = max(-128,spee)
+		#print('spee',spee)
+		self.setSpeed(spee)
+		self.setTurn(turn)	# turn dreht selbst wenn spee negativ ist.
 
 # 
 def testlauf():
-	x=2
+	global speed
+	speed = 50
+	
+	x=5
+	'''
+	fahre vorwärts in eine richtung
+	fahre dann genau entgegengesetzt in die andere Richtung, also 180 grad andere richtung
+	aber rückwärts. also bleibe so, drehe dich nicht um 180 grad!
+	'''
 	
 	a = Antrieb()
 	print(a.getVoltage())
@@ -75,10 +91,10 @@ def testlauf():
 	a.motorStopAutomatic(not False)
 	
 	print('lenke vorwärts')
-	a.lenke(0,True)
+	a.lenke(-30,True)
 	time.sleep(x)
 	print('lenke rückwärts')
-	a.lenke(0,False)
+	a.lenke(-30,False)
 	time.sleep(x)
 	
 	sys.exit()
@@ -111,7 +127,8 @@ def testlauf():
 	print('stop')
 	time.sleep(x)
 
-#testlauf()
+if __name__ == "__main__":
+	testlauf()
 #a = Antrieb()
 #print(a.getVoltage())
 #a.motorStopAutomatic(True)

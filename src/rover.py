@@ -16,6 +16,8 @@ import area
 are = area.prepare() # die fläche wird berechnet
 area.sendmap(are)
 area.resetIst() #
+#sys.exit()
+
 #voltage.startVoltage()
 #bearing.startBearing() #erst nach calibrierung starten
 
@@ -37,12 +39,19 @@ while True:
 		#area.addIstAndSend(Position(i,-i,0))
 		continue			
 	break;	
+
+area.addIstAndSend(a)
+A=a
 	
 #sys.exit()
 
-ofs=starter.getwinkeloffset() # 1 m fahren zwecks richtung
+ofs, winkelGPS = starter.getwinkeloffset() # 1 m fahren zwecks richtung
 offset.writeOffset(ofs) #offset eintragen in ini für bearing oder position
 print('ofs',ofs)
+print('winkelGPS',winkelGPS )
+alpha = winkelGPS
+are.mapnow(a,alpha)
+area.sendmap(are)
 
 #time.sleep(1)
 #sys.exit()
@@ -51,24 +60,20 @@ print('ofs',ofs)
 b = a # die erste Startposition wird der neue Zielpunkt
 a = gps_thread_LatLonFix.getRoverPosition() #die aktuelle Position
 area.addIstAndSend(a)
-
 #offset ende
 bearing.startBearing() #erst nach calibrierung starten
-#a = Position(3.31,-31.5,1)	  
-#b = Position(-0.24,-41.33,1)
 rd = RoverDynamic()
-#motoren.stop()
+
 drive = antrieb.Antrieb()
-b = are.getFirstPoint() # zum Startpunkt der Fläche
+#b = are.getFirstPoint() # zum Startpunkt der Fläche
 
 #time.sleep(1)
 #sys.exit()
 
-
 mqtt_test.mqttsend('cmd','start')
 fahrtrichtung = True 
 # bei nextsectionPaar fahrtrichtung = False #rückwärts zum ErstStartPunkt 
-#a,b = are.getNextSection()
+a,b = are.getNextSectionEinzel()
 while True:
 	#time.sleep(0.5)
 	mqtt_test.mqttsend('compass',compass_i2c.readCalibration())	
@@ -94,9 +99,10 @@ while True:
 		continue
 	#GPS hat neue Position gelesen
 	area.addIstAndSend(r)
-	if (rs.getRestweg() < 0.05):
+	if (rs.getRestweg() < 0.25):
 		# nächsten FahrtAbschnitt einspielen
 		print('wenden.')	
+		mqtt_test.mqttsend('voltage', drive.getVoltage())
 		#motoren.stop()
 		drive.setSpeed(0)
 		x=a
@@ -104,10 +110,12 @@ while True:
 		b=x
 		rd = RoverDynamic()
 		#fahrtrichtung = not fahrtrichtung
-		a,b = are.getNextSectionPaar() #getNextSectionEinzelPaar()
+		#a,b = are.getNextSectionPaar() 
+		a,b = are.getNextSectionEinzel()
 		if a==None or b==None:
 			print('Ziel erreicht.')
-			break	
+			are.reset() #break	
+			a,b = are.getNextSectionEinzel()			
 		print('{: >6}'.format(a.x),'{: >6}'.format(a.y),'->','{: >6}'.format(b.x),'{: >6}'.format(b.y))
 		continue
 	# Action
@@ -118,9 +126,9 @@ while True:
 	#v = rs.getLenkrichtung()
 	#drive.setSpeed(100)
 	if (rs.getRestweg() < 0.20):
-		antrieb.speed = 90
-    else:
-		antrieb.speed = 127		
+		antrieb.speed = 60
+	else:
+		antrieb.speed = 100
 	alpha = rd.getLenkrichtungDynamisch(rs) # hier wird per gps die cm-genaue absolute istbewegung gemessen und daraus der neue sollwinkel berechnet
 	bearing.setSollWinkel(alpha,fahrtrichtung) # hier wird per compass schnell und genau eine richtung geregelt
 	

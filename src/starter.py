@@ -67,7 +67,7 @@ def getwinkeloffset():
 	while result < 0:
 		result+=360	#immer positiven Winkel erzeugen
 	print('gps:',winkelgps,', compass:',winkelcompass,', result:',result)
-	return result
+	return result,winkelgps
 
 
 def kreiscalibierung(a,b):

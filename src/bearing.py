@@ -65,13 +65,11 @@ def server_bearing():
 	while True:	
 		time.sleep(0.1)
 		ist = compass_i2c.bearing16()
-		if not fahrtrichtung:
-			ist += 180  #ziel von hinten anvisieren
 		#ist += offsetwinkel
-		while ist >= 360: #wenn er positiv ist
-			ist -= 360
-		while ist < 0: #wenn er negativ ist
-			ist += 360
+		#while ist >= 360: #wenn er positiv ist
+		#	ist -= 360
+		#while ist < 0: #wenn er negativ ist
+		#	ist += 360
 		ist = round(ist,1)
 		'''
 		 1-20= -19
@@ -91,17 +89,12 @@ def server_bearing():
 		
 		'''
 		delta = ist - soll
-		while delta > 180:
+		
+		if delta > 180:
 			delta -= 360
-		while delta < -180:
+		if delta < -180:
 			delta += 360
-			
-		'''
-		if delta > (180+soll):
-			delta -= 360
-		if delta < -(180+soll):
-			delta += 360
-		'''
+		
 		#delta = int(delta)
 		delta = round(delta,1)
 		#mqtt_test.mqttsend('deltawinkel', delta)
@@ -109,6 +102,7 @@ def server_bearing():
 		delta *= P_FAKTOR
 		delta = round(delta,1)
 		mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))
+		#print(soll,ist,delta)
 		#motoren.lenke(-delta,fahrtrichtung)
 		drive.lenke(-delta,fahrtrichtung)
 
@@ -160,21 +154,24 @@ def run_vorrueck():
 		y += 45
 
 def run_drehen():
+	vor = not True
 	print(antrieb.speed) 
-	antrieb.speed = 0 
+	antrieb.speed = 2
 	print(antrieb.speed) 
 	startBearing()
 	x=7	
-	winkel = [0,90,180,0]
-	for y in winkel:	
-		#antrieb.speed = 0 
+	setSollWinkel(0,True)
+	time.sleep(x)	
+	winkel = [0,170,270,170,0]
+	for y in winkel:			
 		print(y)
-		setSollWinkel(y,False)
+		setSollWinkel(y,vor)
 		time.sleep(x)
 		
-#run_server()
-#run_vorrueck()
-#run_drehen()
+if __name__ == "__main__":
+	#run_server()
+	#run_vorrueck()
+	run_drehen()
 '''
 Lenkung sorgt für die Einhaltung einer Sollrichtung (Himmelsrichtung)
 Sollwinkel einhalten, also sehr gerade fahren und sofort reagieren
