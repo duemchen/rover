@@ -30,7 +30,7 @@ import math
 import sys
 import offset
 
-power = 95
+power = 100
 
 def getwinkeloffset():
 	global power

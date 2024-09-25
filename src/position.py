@@ -305,11 +305,19 @@ def testPositionDynamic():
 	
 	
 	
-	
+def testLenk():
+	offset.writeOffset(0.1)
+	a = Position(0.0,0.0,1)		
+	b = Position(10.0,10.0,1)
+	r = Position(1.0,1.0,1)
+	rd = RoverDynamic()
+	rs = RoverStatic(a,b,r)
+	alpha = rd.getLenkrichtungDynamisch(rs)
+	print(alpha)
 	
 
-
-	
-#test()	
-testPositionDynamic()
+if __name__ == "__main__":
+	#test()	
+	#testPositionDynamic()
+	testLenk()
 	

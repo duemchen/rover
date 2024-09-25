@@ -119,7 +119,7 @@ def server_bearing():
 			mqtt_test.mqttsend('bearing', getBearingJson(soll,ist,delta))			
 			nexttimeBearing = time.time() + 3
 		if(time.time() > nexttimeVoltage):
-			nexttimeVoltage = time.time() + 6
+			nexttimeVoltage = time.time() + 60
 			mqtt_test.mqttsend('voltage', drive.getVoltage())
 			mqtt_test.mqttsend('bearingTiming',getZeitmessungJson())
 

@@ -26,6 +26,7 @@ import json
 import mqtt_test
 import time
 import random
+import sys
 print('area')
 
 
@@ -253,6 +254,47 @@ def prepare():
 	print('prepare: geojson\n\n',getGeoJson(p),'\n')
 	return result
 
+	
+def readmap(filename):
+	with open(filename, 'r') as openfile:
+		# Reading from json file
+		mappe = json.load(openfile)
+		print(mappe)
+		result = []
+		for i in mappe:
+			p=Position(0,0,1)
+			p.x = i[0]
+			p.y = i[1]
+			result.append(p)
+		return result
+
+	
+def loadMap(filename,furchenbreite):
+	poslist = readmap(filename)
+	
+	for p in poslist:
+	  print(p.x,len(poslist))
+	a = poslist[0]  
+	b = poslist[1]  
+	c = poslist[2]  
+	d = poslist[3]  
+	#sys.exit()
+	#a = Position(3.31-1,-31.5,1)	  
+	#b = Position(-0.24-1,-41.33,1)
+	#c = Position(-0.24+1,-41.33,1)
+	#d = Position(3.31+1,-31.5,1)
+	
+	result = area(a,b,c,d)
+	result.setFurchenbreite(furchenbreite)
+	#result.calcPatternGitter()
+	result.calcPatternLang()
+	#result.calcPatternBreit()
+	p = result.getPattern()
+	print('prepare: geojson\n\n',getGeoJson(p),'\n')
+	return result
+
+	
+	
 		
 		
 def test():
