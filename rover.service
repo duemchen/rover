@@ -1,0 +1,12 @@
+https://alexandra-zaharia.github.io/posts/stopping-python-systemd-service-cleanly/
+https://alexandra-zaharia.github.io/posts/how-to-stop-a-python-thread-cleanly/
+
+[Unit]
+Description=Sand Rover Service
+[Service]
+Type=simple
+ExecStart=/usr/bin/python /home/pi/Rover/rover/mainrover.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

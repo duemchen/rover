@@ -21,6 +21,7 @@ sonst mqtt
 
 MAXDELTA = 0.01 #2cm x oder y
 COUNTOK = 3
+SPEED = 10 #80
 map = None  # datensammler zunächst leer
 filename = time.strftime("map-%m%d-%H.%M.json") #'mapdata.json'
 print(filename)
@@ -34,7 +35,7 @@ def gleicheOrt(a,b):
 def ruckVorwärts():
 	print('ruckVorwärts')
 	a = antrieb.Antrieb()
-	a.setSpeed(80)
+	a.setSpeed(SPEED)
 	a.setTurn(0)
 	time.sleep(1.0)		
 	a.setSpeed(0)	
@@ -138,9 +139,9 @@ def play(filename):
 	
 
 if __name__ == "__main__":
-	#recorder()
+	recorder()
 	#play('map-0922-19.25.json')
-	play('map-einfahrt.json')
+	#play('map-einfahrt.json')
 	
 	
 '''	

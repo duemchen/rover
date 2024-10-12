@@ -25,21 +25,17 @@ from position import Position,RoverStatic,RoverDynamic
 #import motoren
 import antrieb_i2c as antrieb
 import compass_i2c
-import bearing 
+#import bearing 
 import math
 import sys
 import offset
 
-power = 100
+power = 20
 
-def getwinkeloffset():
-	global power
+def getwinkeloffset():	
 	a = gps_thread_LatLonFix.getRoverPosition() 
-	#motoren.setPower(power)
-	#motoren.start()	
-	#motoren.lenke(0,True)
 	drive = antrieb.Antrieb()
-	drive.setSpeed(power)
+	drive.setSpeed(antrieb.SLOWSPEED)
 	drive.setTurn(0) #gerade
 	#fahren geradeaus ca. 1m weiter 
 	while True:

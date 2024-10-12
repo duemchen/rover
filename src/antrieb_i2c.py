@@ -11,6 +11,7 @@ import smbus
 import time
 import sys
 import mqtt_test
+from logconfig import log
 
 bus = smbus.SMBus(1)    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
 i2c_address = 0x58
@@ -19,8 +20,11 @@ modeReg = 15
 mode = 3 # beide motoren geschwindigkeit M1, turn M2
 speedReg = 0
 turnReg = 1
-
-speed = 80
+# global genutzt
+SLOWSPEED = 10
+NORMALSPEED = 30
+# 
+speed = 5
 slowSpeed = speed
 slowEnd = time.time() - 1 # bis dahin langsam fahren
 
@@ -33,6 +37,7 @@ def setSlow(sekunden,speed):
 class Antrieb:
 	""" M25 2 Rad Antrieb """
 	def __init__(self):	
+		log.info('new Antrieb')
 		self.i2c_address = 0x58
 		self.batteryReg = 10
 		self.modeReg = 15		
@@ -44,6 +49,7 @@ class Antrieb:
 		self.bus = smbus.SMBus(1)    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
 		self.bus.write_byte_data(i2c_address, modeReg, mode)
 		self.motorStopAutomatic(True)
+		#self.setSpeed(10)
 
 	def motorStopAutomatic(self, active):
 		if active:
@@ -63,8 +69,10 @@ class Antrieb:
 		#print('Spannung: ', result)
 		return str(result) #+' V'
 			
-	def lenke(self,turn,fahrtrichtung):
-		global speed,slowSpeed,slowEnd		
+	def lenke(self,turn,fahrtrichtung,lastsolltime = None):
+		global speed,slowSpeed,slowEnd
+		if lastsolltime == None:
+			lastsolltime = time.time()
 		#speed absenken für einige sekunden
 		if time.time() < slowEnd:
 			spee = slowSpeed
@@ -83,16 +91,22 @@ class Antrieb:
 		spee = min(127,spee)
 		spee = max(-128,spee)
 		#print('spee',spee)
-		self.setSpeed(spee)
+		if time.time() > lastsolltime + 4:	
+			log.info('stop lastsolltime timeout: '+ str(lastsolltime))
+			print('solltime-out')
+			self.setSpeed(0)		#stop wenn keine sollwerte kommen vom gps
+		else:
+			self.setSpeed(spee)		
 		if spee == 0:
 			self.setTurn(0) # im Stand nicht drehen. Sondern dann ausdrücklich mindestens speed 1 oder -1 
 		else: 
 			self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.
-
+		#print('lenke speed/turn:',spee,turn)
+		
 # 
 def testlauf():
 	global speed
-	speed = 50
+	speed = 5
 	
 	x=5
 	'''
@@ -105,7 +119,25 @@ def testlauf():
 	print(a.getVoltage())
 	mqtt_test.mqttsend('voltage', a.getVoltage())
 	a.motorStopAutomatic(not False)
+	speed = 5
 	
+	print('lenke vorwärts')
+	a.lenke(0,True)
+	time.sleep(x)
+	print('lenke rückwärts')
+	a.lenke(0,False)
+	time.sleep(x)
+	print('lenke rechts')
+	a.lenke(10,True)
+	time.sleep(x)
+	print('lenke links')
+	a.lenke(-10,True)
+	time.sleep(x)
+	
+	
+	sys.exit()
+
+	'''	
 	print('lenke vorwärts')
 	a.lenke(-30,True)
 	time.sleep(x)
@@ -115,19 +147,19 @@ def testlauf():
 	
 	sys.exit()
 	
-	
+	'''	
 	
 	a.setTurn(0)	
-	a.setSpeed(50)
+	a.setSpeed(10)
 	
 	print('vorwärts')
 	time.sleep(x)
 	
-	a.setTurn(-30)
+	a.setTurn(-10)
 	print('links')
 	time.sleep(x)
 	
-	a.setTurn(+30)
+	a.setTurn(+10)
 	print('rechts')
 	time.sleep(x)
 	
@@ -135,7 +167,7 @@ def testlauf():
 	print('gerade')
 	time.sleep(x)
 	
-	a.setSpeed(-30)
+	a.setSpeed(-10)
 	print('rückwärts')
 	time.sleep(x)	
 	
@@ -144,6 +176,7 @@ def testlauf():
 	time.sleep(x)
 
 if __name__ == "__main__":
+	print('antrieb_i2ctestlauf')
 	testlauf()
 #a = Antrieb()
 #print(a.getVoltage())

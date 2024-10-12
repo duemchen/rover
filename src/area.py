@@ -47,6 +47,7 @@ class area:
 		self.__pattern = None #list der punkte in fester reihenfolge
 		self.furchenbreite = 0.2
 		self.pos = -1
+		self.pos = -1
 		
 	def calcPatternGitter(self):
 		print('area.calcPattern')
@@ -189,6 +190,11 @@ class area:
 		return result
 	def reset(self):
 		self.pos = -1
+		self.__pattern[0]
+		
+	def addAktPos(self,a):
+		self.__pattern.insert(0, a)
+		
 		
 		'''
 			die punkte sind so in der rechten reihenfolge, der rover muss immer 2 zu einer strecke machen am wendepunkt
@@ -346,6 +352,15 @@ def sendmap(myarea):
 	#arr = json.loads(s)
 	#print('loads\n', arr[0])	
 	#print('loads\n', arr[1])	
+def sendsimplemap(mp):
+	#map = prepare()
+	s =  getJsonMap(mp)
+	#print('s\n',s)
+	mqtt_test.mqttsend('map/soll',s)	
+	#arr = json.loads(s)
+	#print('loads\n', arr[0])	
+	#print('loads\n', arr[1])	
+	
 
 	
 def resetIst():
