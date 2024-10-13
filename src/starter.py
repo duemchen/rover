@@ -39,6 +39,10 @@ def getwinkeloffset():
 	drive.setTurn(0) #gerade
 	#fahren geradeaus ca. 1m weiter 
 	while True:
+		cmd=mqtt_test.getMqttCmd()
+		if(cmd=='stop'):
+			print('Abbruch getwinkeloffset')
+			break;
 		drive.setTurn(0)
 		gps_thread_LatLonFix.event.wait(10)
 		gps_thread_LatLonFix.event.clear()

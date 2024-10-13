@@ -29,7 +29,8 @@ class MyService:
 				if(cmd=='start'):
 					driver=Driver()
 					driver.start()
-				print('Rover is waiting for start')
+				mqtt_test.status('Rover is waiting for start')
+				
 				time.sleep(self.delay)
 				self.logger.info('Tick')	
 		except KeyboardInterrupt:

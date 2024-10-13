@@ -6,8 +6,8 @@ import paho.mqtt.client as mqtt
 
 mqttIP = "192.168.10.51"
 maintopic = 'rover/'
-testtopic = 'test'
 cmdtopic ='cmd'
+statustopic = 'status'
 
 
 receiver = None
@@ -28,6 +28,10 @@ def mqttsend(utopic,payload):
 	except:
 		print('mqtt except');
 
+
+def status(payload):
+	mqttsend(statustopic,payload)
+		
 #grundeinstellung senden
 payload = 'stop'
 mqttsend(cmdtopic,payload)
@@ -70,6 +74,7 @@ mqttc.connect(mqttIP, 1883, 60)
 # manual interface.
 #mqttc.loop_forever()
 mqttc.loop_start()
-payload = 'stop'
-mqttsend(cmdtopic,payload)
-mqttsend(testtopic,test)
+
+if __name__ == '__main__':
+	payload = 'stop'
+	mqttsend(cmdtopic,payload)

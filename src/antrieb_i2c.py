@@ -21,7 +21,7 @@ mode = 3 # beide motoren geschwindigkeit M1, turn M2
 speedReg = 0
 turnReg = 1
 # global genutzt
-SLOWSPEED = 10
+SLOWSPEED = 20
 NORMALSPEED = 30
 # 
 speed = 5
