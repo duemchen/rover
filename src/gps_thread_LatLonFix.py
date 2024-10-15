@@ -8,7 +8,8 @@ from position import Position
 
 from serial import Serial
 from pyubx2 import UBXReader,UBX_PROTOCOL
-
+import setproctitle
+from random import randrange
 
 event = threading.Event()
 
@@ -17,10 +18,12 @@ lon=None
 fix=None
 	
   
-def server_gps():
+def server_gps(title):	
 	"""Simulated function to print server status every 2 seconds."""
 	global lat,lon,fix, event
 	
+	setproctitle.setthreadtitle(title)
+	print(title)
 	stream = Serial(
 		port='/dev/serial0',
 		baudrate = 115200,
@@ -70,10 +73,11 @@ def server_gps():
 	
 def startGPS():	
 	# Initialize the thread with the server_status function as its target
-	t = threading.Thread(target=server_gps)
-
+	t = threading.Thread(target=server_gps,args=('gps',), daemon=True) #'gps'+str(randrange(1000)
+	
+	
 	# Setting the thread as a daemon means it will automatically exit when the main program does
-	t.daemon = True
+	#t.daemon = True
 
 	# Start the server status thread
 	t.start()

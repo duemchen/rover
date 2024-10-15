@@ -129,6 +129,18 @@ class RoverDynamic:
 		#print('dir:',dir,' ', math.degrees(dir))
 		return dir
 		
+	def getWeg(self, rStatic):
+		s = 0
+		if not (self.__lastStatic is None):
+			r = self.__lastStatic.getRoverPosition()
+			b = rStatic.getRoverPosition()		
+			#pythagoras
+			s = math.pow(b.y - r.y , 2) + math.pow(b.x - r.x , 2)
+			s = math.pow(s, 0.5)
+			s = round(s,2) # 0.05
+			print('getWeg:',s)
+		return s
+		
 	def getRoverPosJson(self, abstand, deltadir):
 		return json.dumps({"abstand": round(abstand,2),"winkel": round(math.degrees(deltadir),1)})				
 		
@@ -155,12 +167,15 @@ class RoverDynamic:
 			pAbstandwinkel = min(self.params['pMax'],pAbstandwinkel)			
 			pAbstandwinkel = round(pAbstandwinkel,1)
 			#meter in einen Anteil wandeln, der zu einem I-Anteil addiert wird.
-			#10 cm = 0.10 m = 1 Grad
-			if abstand < 0.1: # nur Feinjustierung
-				i = abstand * self.params['iFaktor'] # meter in gradschritte
-				#i=0
-				self.iAbstand += -i
-				self.iAbstand = round(self.iAbstand,5)
+			#10 cm = 0.10 m = 1 Grad			
+			weg = self.getWeg(b)
+			if weg >= 0.05:  #ein merklicher weg zurückgelegt. Nicht festgefahren
+				if abstand < 0.1: # nur Feinjustierung
+					i = abstand * self.params['iFaktor'] # meter in gradschritte
+					#i=0
+					self.iAbstand += -i
+					self.iAbstand = round(self.iAbstand,5)
+				
 			#
 			#self.iAbstand = max(-self.params['iMax'],self.iAbstand)
 			#self.iAbstand = min(self.params['iMax'],self.iAbstand)
@@ -313,11 +328,26 @@ def testLenk():
 	rd = RoverDynamic()
 	rs = RoverStatic(a,b,r)
 	alpha = rd.getLenkrichtungDynamisch(rs)
-	print(alpha)
+	print('alpha',alpha)
+
+def testWeg():
+	offset.writeOffset(0.1)
+	a = Position(0.0,0.0,1)		
+	b = Position(10.0,10.0,1)
+	r = Position(1.0,1.0,1)
+	w = Position(2.0,2.0,1)
+	rd = RoverDynamic()
+	rs = RoverStatic(a,b,r)
+	alpha = rd.getLenkrichtungDynamisch(rs)	
+	print('alpha',alpha)
+	rs = RoverStatic(a,b,w)
+	alpha = rd.getLenkrichtungDynamisch(rs)	
+	print('alpha',alpha)
 	
 
 if __name__ == "__main__":
 	#test()	
 	#testPositionDynamic()
-	testLenk()
+	#testLenk()
+	testWeg()
 	

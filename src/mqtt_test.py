@@ -26,7 +26,7 @@ def mqttsend(utopic,payload):
 	try:
 		publish.single(maintopic+utopic, payload, hostname = mqttIP)
 	except:
-		print('mqtt except');
+		print('mqtt send except');
 
 
 def status(payload):
@@ -41,7 +41,7 @@ mqttsend(cmdtopic,payload)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code, properties):
-    print(f"Connected to {mqttIP} with result code {reason_code}")
+    print(f"mqtt: Connected to {mqttIP} with result code {reason_code}")
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
     client.subscribe("rover/cmd")
@@ -54,7 +54,7 @@ def on_disconnect(client, userdata, rc):
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
 	global receiver,test
-	print(msg.topic+" payload: "+str(msg.payload.decode("utf-8")))	
+	print('mqtt:',msg.topic+" payload: "+str(msg.payload.decode("utf-8")))	
 	if msg.topic == "rover/cmd":
 		receiver = str(msg.payload.decode("utf-8"))
 	if msg.topic == "rover/test":

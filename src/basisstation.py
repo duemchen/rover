@@ -25,7 +25,7 @@ MQTT senden:
 import json  
 import mqtt_test  
 
-print('basisStation.py\n\n')
+print('basisStation.py')
 
 
 lon1 = 12.8944262
@@ -54,23 +54,23 @@ def el2meter(x1,x2,y1,y2):
 	
 def basisbau():
 	global lon0,lat0,lonFaktor,latFaktor,dx1,dy1,dx2,dy2
-	print('basisbau') 
+	#print('basisbau') 
 	lon0 = nullstelle(dx1,dx2,lon1,lon2)	
-	print('lon0 ',lon0)
+	#print('lon0 ',lon0)
 	lat0 = nullstelle(dy1,dy2,lat1,lat2)	
-	print('lat0 ',lat0)
+	#print('lat0 ',lat0)
 
 	lonFaktor = el2meter(dx1,dx2,lon1,lon2)
 	latFaktor = el2meter(dy1,dy2,lat1,lat2)
-	print('faktoren ',lonFaktor,', ',latFaktor)
+	#print('faktoren ',lonFaktor,', ',latFaktor)
 
 	dx = round(lonFaktor * (lon1-lon0),2)
 	dy = latFaktor * (lat1-lat0)
-	print('Eichpunkt ',dx,', ',dy)
+	#print('Eichpunkt ',dx,', ',dy)
 
 	dx = lonFaktor * (lon2-lon0)
 	dy = latFaktor * (lat2-lat0)
-	print('Eichpunkt ',dx,', ',dy)
+	#print('Eichpunkt ',dx,', ',dy)
 
 
 

@@ -25,18 +25,20 @@ from position import Position,RoverStatic,RoverDynamic
 #import motoren
 import antrieb_i2c as antrieb
 import compass_i2c
-#import bearing 
 import math
 import sys
 import offset
+import async_bearing
 
 power = 20
 
 def getwinkeloffset():	
 	a = gps_thread_LatLonFix.getRoverPosition() 
-	drive = antrieb.Antrieb()
-	drive.setSpeed(antrieb.SLOWSPEED)
-	drive.setTurn(0) #gerade
+	antrieb.speed = antrieb.SLOWSPEED
+	print('speed',antrieb.speed)
+	fahrtrichtung = True
+	winkelcompass = compass_i2c.bearing16()
+	async_bearing.setSollWinkel(winkelcompass,fahrtrichtung)		
 	#fahren geradeaus ca. 1m weiter 
 	while True:
 		cmd=mqtt_test.getMqttCmd()
@@ -53,7 +55,7 @@ def getwinkeloffset():
 		if weg > 1: 
 			break
 	#motoren.stop()	
-	drive.setSpeed(0)
+	antrieb.speed = 0
 	time.sleep(0.2)
 	gps_thread_LatLonFix.event.wait(10)
 	gps_thread_LatLonFix.event.clear()
@@ -109,6 +111,8 @@ def kreiscalibierung(a,b):
 			print("Kompass calibriert")
 			break		
 
+			
+			
 def test():
 	global power
 	#voltage.startVoltage()
@@ -146,4 +150,45 @@ def test():
 	#time.sleep(0.2)
 	#sys.exit()
 
-#test()
+
+def xxxgetwinkeloffset():	
+	a = gps_thread_LatLonFix.getRoverPosition() 
+	drive = antrieb.Antrieb()
+	drive.setSpeed(antrieb.SLOWSPEED)
+	drive.setTurn(0) #gerade
+	#fahren geradeaus ca. 1m weiter 
+	while True:
+		cmd=mqtt_test.getMqttCmd()
+		if(cmd=='stop'):
+			print('Abbruch getwinkeloffset')
+			break;
+		drive.setTurn(0)
+		gps_thread_LatLonFix.event.wait(10)
+		gps_thread_LatLonFix.event.clear()
+		b = gps_thread_LatLonFix.getRoverPosition() 
+		weg = math.pow(b.y - a.y , 2) + math.pow(b.x - a.x , 2)
+		weg = math.pow(weg, 0.5)
+		print('Weg:',weg)
+		if weg > 1: 
+			break
+	#motoren.stop()	
+	drive.setSpeed(0)
+	time.sleep(0.2)
+	gps_thread_LatLonFix.event.wait(10)
+	gps_thread_LatLonFix.event.clear()
+	b = gps_thread_LatLonFix.getRoverPosition() 
+	# Winkelversatz zwischen GPS und Compass bestimmen
+	rs = RoverStatic(a,b,b)
+	winkelgps = rs.getLeitstrahlWinkel()
+	winkelgps = round(math.degrees(winkelgps),1)
+	winkelcompass = compass_i2c.bearing16()
+	result = round(winkelcompass - winkelgps,1)
+	while result < 0:
+		result+=360	#immer positiven Winkel erzeugen
+	print('gps:',winkelgps,', compass:',winkelcompass,', result:',result)
+	return result,winkelgps
+
+if __name__ == '__main__':
+	test()
+
+

@@ -2,7 +2,7 @@
 import json
 import os.path
 
-filename = 'rover_params.json'
+filename = '/home/pi/.rover/rover_params.json'
  
 def toParamFile(p,pmax,iw,iF,imax):
 	# Data to be written
@@ -40,6 +40,7 @@ def test():
 
 print(os.path.abspath(filename))	
 if not os.path.isfile(filename):
-	toParamFile(60,50,1,5,10)
-
-test()
+	toParamFile(190,100,0,1,100)
+	
+if __name__ == '__main__':
+	test()

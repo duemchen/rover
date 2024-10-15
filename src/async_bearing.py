@@ -11,6 +11,7 @@ import math
 import antrieb_i2c as antrieb
 import json  
 import gc
+import setproctitle
  
 print("async_bearing")
 print ("Garbage collection thresholds:", gc.get_threshold())
@@ -88,6 +89,7 @@ nexttimeVoltage = 0
 # main coroutine for the asyncio program
 async def bearing_coroutine():
     # run the event loop a whole
+	setproctitle.setthreadtitle('bearing')
 	reconnect_interval = 7  # In seconds
 	global soll,fahrtrichtung,nexttimeBearing,nexttimeVoltage
 	fahrtrichtung = True  # vorwärts true
@@ -136,14 +138,27 @@ async def bearing_coroutine():
 			await asyncio.sleep(reconnect_interval)
 			antrieb.speed = antriebspeed
 	print("coroutine ende")
-	drive.stop()
- 
+	drive.stopple() #kooemm nie hier lang
+
+
+# helper function to start and run the asyncio event loop
+def run_event_loop():
+	# start the event loop
+	asyncio.run(bearing_coroutine())
+	setproctitle.setthreadtitle('asyncio')
 # create a new thread to execute a target coroutine
 def startbearing():
-	thread = threading.Thread(target=asyncio.run, args=(bearing_coroutine(),))
+	##thread = threading.Thread(target=asyncio.run, args=(bearing_coroutine(),))
+	thread = threading.Thread(target=run_event_loop)	
+	
 	thread.daemon = True
+	
 	# start the new thread
 	thread.start()
+
+
+
+
 
 	
 def run_drehen():

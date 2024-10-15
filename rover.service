@@ -4,6 +4,7 @@ https://alexandra-zaharia.github.io/posts/how-to-stop-a-python-thread-cleanly/
 [Unit]
 Description=Sand Rover Service
 [Service]
+WorkingDirectory=/home/pi/Rover/rover
 Type=simple
 ExecStart=/usr/bin/python /home/pi/Rover/rover/mainrover.py
 Restart=on-abort

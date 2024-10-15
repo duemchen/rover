@@ -27,6 +27,7 @@ import mqtt_test
 import time
 import random
 import sys
+import os
 print('area')
 
 
@@ -242,6 +243,17 @@ class area:
 		self.__pattern.clear()
 		self.__pattern.extend(soll)		
 
+	def calcRahmen(self):
+		print('area.calcRahmen')  #fehlerhaft
+		p = []
+		p.append(self.__A)
+		p.append(self.__B)
+		p.append(self.__C)
+		p.append(self.__D)
+		p.append(self.__A)
+		self.__pattern = p
+		print('rahmen',p)
+		
 
 		
 
@@ -275,8 +287,9 @@ def readmap(filename):
 		return result
 
 	
-def loadMap(filename,furchenbreite):
-	poslist = readmap(filename)
+def loadMap(filename,furchenbreite = 0.5):	
+	# nicht als service: poslist = readmap(filename)
+	poslist = readmap(os.path.realpath(filename))
 	
 	for p in poslist:
 	  print(p.x,len(poslist))
@@ -289,7 +302,6 @@ def loadMap(filename,furchenbreite):
 	#b = Position(-0.24-1,-41.33,1)
 	#c = Position(-0.24+1,-41.33,1)
 	#d = Position(3.31+1,-31.5,1)
-	
 	result = area(a,b,c,d)
 	result.setFurchenbreite(furchenbreite)
 	#result.calcPatternGitter()
@@ -299,9 +311,19 @@ def loadMap(filename,furchenbreite):
 	print('prepare: geojson\n\n',getGeoJson(p),'\n')
 	return result
 
+def loadRahmen(filename):	
+	poslist = readmap(os.path.realpath(filename))
 	
+	for p in poslist:
+	  print(p.x,len(poslist))
+	a = poslist[0]  
+	b = poslist[1]  
+	c = poslist[2]  
+	d = poslist[3]  
+	result = area(a,b,c,d)	
+	result.calcRahmen()
 	
-		
+
 		
 def test():
 	a = area(Position(0.0,0.0,1),Position(-4.0,10.0,1),Position(12.0,12.0,1),Position(10.0,-2.0,1))

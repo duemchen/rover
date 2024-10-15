@@ -92,15 +92,16 @@ class Antrieb:
 		spee = max(-128,spee)
 		#print('spee',spee)
 		if time.time() > lastsolltime + 4:	
-			log.info('stop lastsolltime timeout: '+ str(lastsolltime))
-			print('solltime-out')
+			#log.info('stop lastsolltime timeout: '+ str(lastsolltime))
+			#print('solltime-out')
 			self.setSpeed(0)		#stop wenn keine sollwerte kommen vom gps
+			self.setTurn(0)
 		else:
 			self.setSpeed(spee)		
-		if spee == 0:
-			self.setTurn(0) # im Stand nicht drehen. Sondern dann ausdrücklich mindestens speed 1 oder -1 
-		else: 
-			self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.
+			if spee == 0:
+				self.setTurn(0) # im Stand nicht drehen. Sondern dann ausdrücklich mindestens speed 1 oder -1 
+			else: 
+				self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.
 		#print('lenke speed/turn:',spee,turn)
 		
 # 

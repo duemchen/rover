@@ -1,15 +1,22 @@
 #!/usr/bin/python
 
+#cwd = os.getcwd()  os.chdir
+
 from time import sleep
 import logging
 import os
 import sys
 import time
-sys.path.insert(0, 'src')
+#sys.path.insert(0, 'src')
+sys.path.append(os.path.join(sys.path[0],'src'))
 from logconfig import log
 import signal
 import mqtt_test
 from drivers import Driver
+import setproctitle
+from enviro import Environment
+
+#setproctitle.setproctitle('python-rover-main') #setthreadtitle
 
 class MyService:
 	def __init__(self, delay=1):
@@ -19,8 +26,10 @@ class MyService:
 		self.logger = log
 		self.delay = delay
 		self.logger.info('MyService instance created')
+		self.env = Environment()  # alle Threads starten 
 		
 	def start(self):
+		
 		try:			
 			while True:	#in schleife auf mqtt befehle warten, 
 						#programmteile anspringen, die ebenfalls von mqtt beendet werden können oder selbst beenden
@@ -29,10 +38,17 @@ class MyService:
 				if(cmd=='start'):
 					driver=Driver()
 					driver.start()
+				if(cmd=='restart'):
+					print("cmd",cmd) 
+					mqtt_test.status('Rover Service Restart')
+					os.system("sudo systemctl restart rover.service")
+					time.sleep(5)
+
 				mqtt_test.status('Rover is waiting for start')
-				
+									
+				mqtt_test.status('Rover is waiting for start')				
 				time.sleep(self.delay)
-				self.logger.info('Tick')	
+				#self.logger.info('Tick')	
 		except KeyboardInterrupt:
 			self.logger.warning('Keyboard interrupt (SIGINT) received...')
 			self.stop()
@@ -40,6 +56,7 @@ class MyService:
 	def stop(self):
 		self.logger.info('Cleaning up...')				
 		time.sleep(1)
+		self.env.stop()
 		self.logger.info('bye.')				
 		#todo was sinnvolles, alle motoren aus.
 		sys.exit(0)
