@@ -16,7 +16,8 @@ event = threading.Event()
 lat=None
 lon=None
 fix=None
-	
+
+
   
 def server_gps(title):	
 	"""Simulated function to print server status every 2 seconds."""
@@ -83,6 +84,10 @@ def startGPS():
 	t.start()
 
 def getRoverPosition():
+	#lon = basisstation.lon1
+	#lat = basisstation.lat1
+	#fix = 1
+	#print('\n\na',lon,lat,fix)
 	return Position(basisstation.lon2meter(lon),basisstation.lat2meter(lat),fix)	
 	
 def run_server():

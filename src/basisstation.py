@@ -109,5 +109,5 @@ def test():
 	
 #mqtt_test.mqttsend('position',jsPos)	
 #print('-----------------------\n\n')
+print("lon,lat delta: ",lon2-lon1,",",lat2-lat1)
 
-	print("lon,lat delta: ",lon2-lon1,",",lat2-lat1)

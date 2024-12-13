@@ -85,21 +85,24 @@ def getZeitmessungJson():
 nexttimeBearing = 0
 nexttimeVoltage = 0
 
-
+dorunco = True
+lenkFlag  = True
 # main coroutine for the asyncio program
 async def bearing_coroutine():
+	print("async_bearing coroutine start")
     # run the event loop a whole
 	setproctitle.setthreadtitle('bearing')
 	reconnect_interval = 7  # In seconds
-	global soll,fahrtrichtung,nexttimeBearing,nexttimeVoltage
+	global soll,fahrtrichtung,nexttimeBearing,nexttimeVoltage,dorunco,lenkFlag
 	fahrtrichtung = True  # vorwärts true
+	soll = compass_i2c.bearing16() # ist == soll
 	drive = antrieb.Antrieb()
 	while True:
 		try:
 			client = aiomqtt.Client(mqttIP,mqttPort) 
 			print('bearing while...')
 			####
-			while True:
+			while dorunco:
 				zeitmessung()
 				startzeit = time.perf_counter()						
 				ist = compass_i2c.bearing16()
@@ -116,7 +119,9 @@ async def bearing_coroutine():
 				# delta positiv zu weit rechts (also nach links lenken)
 				delta *= P_FAKTOR
 				delta = round(delta,1)
-				drive.lenke(-delta,fahrtrichtung,lastsolltime)
+				if lenkFlag:
+					drive.lenke(-delta,fahrtrichtung,lastsolltime)
+					
 				#entlastende seltene Aktionen
 				if(time.time() > nexttimeBearing):
 					async with client:
@@ -130,7 +135,8 @@ async def bearing_coroutine():
 				# suspend a moment
 				#oo = gc.collect()
 				#print('gc:', oo)
-				await asyncio.sleep(0.2)
+				await asyncio.sleep(0.2) 
+			await asyncio.sleep(0.2) #im "ruhezustand"
 		except aiomqtt.MqttError as error:
 			print(f'Error "{error}". Reconnecting in {reconnect_interval} seconds.')
 			antriebspeed = antrieb.speed
@@ -149,15 +155,17 @@ def run_event_loop():
 # create a new thread to execute a target coroutine
 def startbearing():
 	##thread = threading.Thread(target=asyncio.run, args=(bearing_coroutine(),))
+	dorunco = True
 	thread = threading.Thread(target=run_event_loop)	
-	
 	thread.daemon = True
-	
-	# start the new thread
 	thread.start()
 
+def stopbearing():
+	dorunco = False
 
-
+def setbearingLenkung(flag):
+	global lenkFlag
+	lenkFlag = flag 
 
 
 	

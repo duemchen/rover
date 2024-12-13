@@ -24,8 +24,8 @@ turnReg = 1
 SLOWSPEED = 20
 NORMALSPEED = 30
 # 
-speed = 5
-slowSpeed = speed
+speed = 0
+slowSpeed = 0
 slowEnd = time.time() - 1 # bis dahin langsam fahren
 
 def setSlow(sekunden,speed):
@@ -87,7 +87,14 @@ class Antrieb:
 			
 		turn = min(127,turn)
 		turn = max(-128,turn)
-		#print('turn',turn)
+		#todo begrenzung der Lenkbewegung zur Dämpfung bei Sprüngen
+		if abs(speed)!=0:
+			if abs(turn) > 0.2:
+				print('turn',turn,'speed', spee,str(time.time()))
+		TURNMAX = 22  # oder nicht höher als speed, also nie rückwärts gegendrehen?
+		turn = min(TURNMAX,turn)
+		turn = max(-TURNMAX,turn)
+		
 		spee = min(127,spee)
 		spee = max(-128,spee)
 		#print('spee',spee)
@@ -101,13 +108,13 @@ class Antrieb:
 			if spee == 0:
 				self.setTurn(0) # im Stand nicht drehen. Sondern dann ausdrücklich mindestens speed 1 oder -1 
 			else: 
-				self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.
-		#print('lenke speed/turn:',spee,turn)
+				self.setTurn(turn)	# turn dreht selbst wenn spee negativ oder null ist.		
+		#print('turn',turn,'speed', spee)
 		
 # 
 def testlauf():
 	global speed
-	speed = 5
+	speed = 50
 	
 	x=5
 	'''
@@ -120,7 +127,7 @@ def testlauf():
 	print(a.getVoltage())
 	mqtt_test.mqttsend('voltage', a.getVoltage())
 	a.motorStopAutomatic(not False)
-	speed = 5
+	speed = 15
 	
 	print('lenke vorwärts')
 	a.lenke(0,True)

@@ -6,7 +6,8 @@ Description=Sand Rover Service
 [Service]
 WorkingDirectory=/home/pi/Rover/rover
 Type=simple
-ExecStart=/usr/bin/python /home/pi/Rover/rover/mainrover.py
+ExecStartPre=/bin/sh -c 'until ping -c1 google.com; do sleep 1; done;'
+ExecStart=/usr/bin/python /home/pi/Rover/rover/src/mainrover.py
 Restart=on-abort
 
 [Install]

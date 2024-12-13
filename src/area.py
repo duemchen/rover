@@ -50,6 +50,9 @@ class area:
 		self.pos = -1
 		self.pos = -1
 		
+	def setPos(self,i):
+		self.pos = i
+	
 	def calcPatternGitter(self):
 		print('area.calcPattern')
 		p = []

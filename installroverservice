@@ -1,8 +1,8 @@
 
-rm /lib/systemd/system/rover.service
+sudo rm /lib/systemd/system/rover.service
 sudo ln -sf /home/pi/Rover/rover/rover.service /lib/systemd/system/rover.service 
 
-chmod +x /home/pi/Rover/rover/mainrover.py
+sudo chmod +x /home/pi/Rover/rover/src/mainrover.py
 sudo systemctl daemon-reload
 sudo systemctl enable rover.service
 sudo systemctl start rover.service

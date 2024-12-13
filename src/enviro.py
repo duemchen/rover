@@ -15,25 +15,41 @@ import math
 class Environment:
 
 	def __init__(self):		
+		self.dorun=True
 		self.logger = log
+		
+	def start(self):
 		self.logger.info('Umgebung wird gestartet...')
 		self.startBearing()
 		self.startGpsToFix()
 		self.calibrateCompass()
+	def startInnen(self):
+		self.logger.info('Innen-Umgebung wird gestartet...')
+		self.startBearing()
+		#self.startGpsToFix()
+		#self.calibrateCompass()
+		
 	
-	def stop():
+	def stop(self):
 		antrieb.speed = 0
+		async_bearing.stopbearing() 
+		self.dorun=False
 		
 	def startBearing(self):
 		mqtt_test.status('start Bearing...')
 		async_bearing.startbearing() 
 				
 	def startGpsToFix(self):
+		mqtt_test.status('start GPS...')
 		gps_thread_LatLonFix.startGPS()
 		time.sleep(2)
 		#zuerst offset bestimmen
 		i=0
-		while True:
+		while self.dorun:
+			time.sleep(0.5)
+			cmd=mqtt_test.getMqttCmd()
+			if(cmd=='restart'):
+				break
 			gps_thread_LatLonFix.event.wait(10)
 			gps_thread_LatLonFix.event.clear()
 			a = gps_thread_LatLonFix.getRoverPosition() 	
@@ -65,14 +81,21 @@ class Environment:
 		winkelcompass = compass_i2c.bearing16()
 		async_bearing.setSollWinkel(winkelcompass,fahrtrichtung)		
 		#fahren geradeaus ca. 1m weiter 
-		while True:
+		while self.dorun:
+			cmd=mqtt_test.getMqttCmd()
+			if(cmd=='restart'):
+				break
 			async_bearing.setSollWinkel(winkelcompass,fahrtrichtung)					
 			gps_thread_LatLonFix.event.wait(10)
 			gps_thread_LatLonFix.event.clear()
 			b = gps_thread_LatLonFix.getRoverPosition() 
+			if b.fix == 0:
+				print('nofix')
+				continue
 			weg = math.pow(b.y - a.y , 2) + math.pow(b.x - a.x , 2)
 			weg = math.pow(weg, 0.5)
-			print('Weg:',weg)
+			weg = round(weg,3)
+			print('getwinkeloffset Weg:',weg)
 			if weg > 1: 
 				break
 		#motoren.stop()	
@@ -98,5 +121,6 @@ class Environment:
 if __name__ == '__main__':
 	env = Environment()	      
 	print('env ok')
-	time.sleep(5)
+	time.sleep(2)
+	env.stop()
 	

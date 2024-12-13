@@ -63,5 +63,9 @@ def run_server():
 		print(x,"[Server]: Processing data...")
 		time.sleep(1)
 
-#run_server()  # Run the main server function
-#print("Server shutdown.")
+
+
+	
+if __name__ == '__main__':
+	run_server()  # Run the main server function
+	print("Server shutdown.")
