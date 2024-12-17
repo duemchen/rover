@@ -177,6 +177,7 @@ class area:
 
 	def getNextSectionEinzel(self):
 		''' letzer Punkt bis zum nächsten '''
+		self.sendMapDoneSoll() #war unten im finally
 		result = []
 		if self.pos == -1:
 			self.pos +=1
@@ -188,7 +189,7 @@ class area:
 			return None,None
 		result.append(self.__pattern[self.pos])			
 		return result[0],result[1]
-		
+	
 	def getFirstPoint(self):
 		result = self.__pattern[0]
 		return result
@@ -257,9 +258,21 @@ class area:
 		self.__pattern = p
 		print('rahmen',p)
 		
-
-		
-
+	
+	def sendMapDoneSoll(self):
+		# done und soll an mqtt senden am aktuellen index trennen
+		#print(ist)
+		list = self.getPattern()
+		print("listlen", len(list))
+		idx = self.pos
+		done = list[:idx+1]
+		print("done",len(done))
+		s = getJsonMap(done)
+		mqtt_test.mqttsend('map/done',s)	
+		soll = list[idx:] 		
+		print("soll",len(soll))
+		s = getJsonMap(soll)
+		mqtt_test.mqttsend('map/soll',s)	
 		
 def prepare():	
 	a = Position(3.31-1,-31.5,1)	  
@@ -377,6 +390,12 @@ def sendmap(myarea):
 	#arr = json.loads(s)
 	#print('loads\n', arr[0])	
 	#print('loads\n', arr[1])	
+	
+	
+
+	
+	
+	
 def sendsimplemap(mp):
 	#map = prepare()
 	s =  getJsonMap(mp)
@@ -409,6 +428,8 @@ def addIstAndSend(pos):
 	mqtt_test.mqttsend('map/ist',s)	
 
 	
+	
+	
 def testist():
 	resetIst()
 	for i in (1,2,3,4,5,6):
@@ -425,9 +446,27 @@ def mapnowtest():
 	are.mapnow(A,alpha)
 	sendmap(are)
 		
+		
+def testDoneSollIst():
+	a = area(Position(0.0,-0.0,1),Position(-4.0,10.0,1),Position(12.0,12.0,1),Position(10.0,-2.0,1))
+	a.setFurchenbreite(2.5)
+	#a.calcPatternGitter()
+	a.calcPatternLang()
+	a.setPos(10)
+	a.sendMapDoneSoll()
+	resetIst()
+
+		
 if __name__ == "__main__":
 	#testist()
-	mapnowtest()
+	#mapnowtest()
+	testDoneSollIst()
+	
+	
+
+	
+	
+	
 		
 '''
 {

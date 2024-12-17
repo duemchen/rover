@@ -85,7 +85,7 @@ class Driver:
 				rd = RoverDynamic()
 				#fahrtrichtung = not fahrtrichtung
 				#a,b = are.getNextSectionPaar() 
-				a,b = self.are.getNextSectionEinzel()
+				a,b = self.are.getNextSectionEinzel()				
 				if a==None or b==None:
 					print('Ziel erreicht.')
 					if not True:

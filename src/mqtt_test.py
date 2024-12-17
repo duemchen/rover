@@ -35,7 +35,12 @@ def mqttsend(utopic,payload,flagretain=False):
 
 def status(payload):
 	mqttsend(statustopic,payload)
-		
+	
+
+
+def command(payload):
+	mqttsend(cmdtopic,payload)
+	
 #grundeinstellung senden
 payload = 'stop'
 mqttsend(cmdtopic,payload)

@@ -44,6 +44,8 @@ class MyService:
 				if(cmd=='area'):   # auf seite area wechseln, dort anzeigen der map und berechnung und ggf start
 					driver=Driver()
 					driver.start()
+					mqtt_test.command('stop')
+					time.sleep(1)
 				if(cmd=='joy'):
 					joy=Joy()
 					joy.joy()
