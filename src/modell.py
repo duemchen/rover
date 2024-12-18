@@ -1,3 +1,13 @@
+from position import Position, RoverStatic, RoverDynamic
+import mqtt_test
+import json
+import area
+import threading
+import mapposition
+import time
+import math
+import area
+
 '''
 neustart bei jedem gps signal
 bis zum neuen gps:
@@ -14,27 +24,25 @@ bis zum neuen gps:
 	Restweg mit Motordrosselung an ecken
 	
 '''
-class Poszeit
+class Poszeit:
 	def __init__(self, zeitpunkt, position, winkel):
 		self.zeitpunkt=zeitpunkt
 		self.position=position
 		self.winkel=winkel
 		
-class Modell
+class Modell:
 	'''
 	hier werden alle Daten gehalten und verrechnet
 	'''
 
-	def __init__(self):
-		are ist die komplette berechnete fahrtroute. die karte hier laden? durch weiterbewegung komme ich an ende der strecke. neuen abschnitt aufrufen
-		#
+	def __init__(self):		
 		self.are = None
 		#
 		self.gpspoz = None
 		self.gpsv = 0
 		#
-		self.pz1 = None
-		self.pz2 = None
+		self.pz1 = Poszeit(0,Position(0,0,0),0)
+		self.pz2 = Poszeit(0,Position(0,0,0),0)
 		#
 		self.ps = None
 		self.pd = None
@@ -59,22 +67,22 @@ class Modell
 		self.pz2.zeitpunkt = time.time()
 		zeit = self.pz2.zeitpunkt - self.pz1.zeitpunkt		
 		h = self.v * zeit #hypothenuse
-		winkel = (pz1.winkel + pz2.winkel) / 2  # Mitteln
+		winkel = (self.pz1.winkel + self.pz2.winkel) / 2  # Mitteln
 		# p2.position berechnen
 		x =  math.sin(winkel) * h
 		y =  math.cos(winkel) * h
-		self.pz2.x = self.pz1.position.x + x
-		self.pz2.y = self.pz1.position.y + y
+		self.pz2.position.x = self.pz1.position.x + x
+		self.pz2.position.y = self.pz1.position.y + y
 		
 	def calculate(self):
 		# entweder eine frische GPS oder eine am Modell berechnete Position
-		if gpsevent.is_set():
+		if self.gpsevent.is_set():
 			self.p2 = self.gpspoz
 			self.v = self.gpsv
 			self.gpsevent.clear
 		else:
-			calcPos2()
-		area.addIstAndSend(self.p2.position)
+			self.calcPos2()
+		area.addIstAndSend(self.pz2.position)
 		
 	def setgpspoz(self,gpspos,gpstime):
 		# von aussen gefüllt
@@ -85,11 +93,11 @@ class Modell
 		#self.gpspoz.winkel = gpswinkel  # winkelmessung zum Zeitpunkt ??		
 		self.gpsevent.set() # mitteilung an bearing zur übernahme der neuen position in die simulation
 		
-	def calcvelocity(gpspos,gpstime)
+	def calcvelocity(gpspos,gpstime):
 		def pythagoras(c,d):
 			result = math.pow(c, 2) + math.pow(d, 2)
 			result = math.pow(result, 0.5)
-		if gpspoz <> None:
+		if gpspoz != None:
 			a = self.gpspoz.position
 			b = gpspos
 			self.gpsv = pythagoras((a.position.x-b.position.x),(a.position.y-b.position.y)) / abs(gpstime - a.zeitpunkt)
@@ -104,16 +112,16 @@ class Modell
 		return alpha
 		
 	def leitlinie(self,rs):
-		if rs.getRestweg() < 0.20):
+		if rs.getRestweg() < 0.05:
 			self.a, self.b = self.are.getNextSectionEinzel()	#umschaltung zur nächsten Section
-		result = not(self.a=None || self.b==None) #abbruchbedingung
+		result = not((self.a is None) | (self.b is None)) #abbruchbedingung
 		
 	def lenkeviaModell(self):
-		model.calculate()
-		rs = RoverStatic(a,b,self.p2.position)
-		if not model.leitlinie(rs):
-			print('Streckenende erreicht)
-			break			
+		self.calculate()
+		rs = RoverStatic(self.a, self.b ,self.pz2.position)
+		if not self.leitlinie(rs):
+			print('Streckenende erreicht')
+			return None			
 		alpha = model.getLenkrichtung(rs)
 		return alpha
 
@@ -134,20 +142,25 @@ def loadArea():
 	return are	
 
 	
-	def test():
-		gpspos = Position(0,0,0)
-		are = loadArea()  #via mqtt definiert
-		model =  Modell()
-		model.setare(are,gpspos)		
-		i=0
-		while True:
-			i+=1
-			time.sleep(1)
-			alpha = model.lenkeviaModell()
-			print('alpha:'+ alpha)
-			if i>10:
-				i=0
-				model.setgpspoz(pos,time.time())  #generieren gps in der korrekten stelle der leitline mit zufälligen abweichungen
+def test():
+	gpspos = Position(0,0,0)
+	are = loadArea()  #via mqtt definiert
+	#
+	area.addIstAndSend(gpspos)
+	are.addAktPos(gpspos)  #von hier zum start 
+	#
+	model = Modell()
+	model.setare(are,gpspos)		
+	i=0
+	while True:
+		i+=1
+		time.sleep(1)
+		alpha = model.lenkeviaModell()
+		if alpha == None:
+			print('fahrt ende.')
+			break
+		print('alpha:'+ alpha)
+		#if i>10:	i=0		model.setgpspoz(pos,time.time())  #generieren gps in der korrekten stelle der leitline mit zufälligen abweichungen
 		
-		
+test()
 		
