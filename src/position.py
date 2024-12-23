@@ -28,7 +28,11 @@ class Position:
 	def round(self):
 		self.x=round(self.x,2);
 		self.y=round(self.y,2);
-	  
+	def __str__(self):
+		return '[x:'+str(self.x) + ", y:" + str(self.y)+']'
+	def copy(self):
+		result = Position(self.x,self.y,self.fix)
+		return result
 	  
 class RoverStatic:
 	"""akt. statische Situation des Rover zur akt. StartZielLinie """
@@ -117,7 +121,8 @@ class RoverDynamic:
 		self.params = roverparams.getParamFile()		
 		#print('Rover Params', self.params)
 		self.iAbstand = offset.readOffset() #self.params['iWert']		
-		print('init iAbstand',self.iAbstand)		
+		self.iAbstand = 0 
+		#print('init iAbstand',self.iAbstand)		
 		mqtt_test.mqttsend('params', json.dumps(self.params, indent=4))
 				
 	def getDirection(self, rStatic):
@@ -138,7 +143,7 @@ class RoverDynamic:
 			s = math.pow(b.y - r.y , 2) + math.pow(b.x - r.x , 2)
 			s = math.pow(s, 0.5)
 			s = round(s,2) # 0.05
-			print('getWeg:',s)
+			print('position.getWeg:',s)
 		return s
 		
 	def getRoverPosJson(self, abstand, deltadir):
@@ -162,10 +167,14 @@ class RoverDynamic:
 			leit = round(math.degrees(leit),1)
 			abstand = b.getAbstand() #links minus, rechts plus			
 			#meter nach winkel. je weiter weg umso stärker hinlenken
+			#print('abstand',abstand)
+			pAbstandwinkel = abstand * 30 #10 #60 #20  # 100 ==> 1 cm 1 grad
+			'''
 			pAbstandwinkel = abstand * self.params['pWert']
 			pAbstandwinkel = max(-self.params['pMax'],pAbstandwinkel)
 			pAbstandwinkel = min(self.params['pMax'],pAbstandwinkel)			
 			pAbstandwinkel = round(pAbstandwinkel,1)
+			'''
 			#meter in einen Anteil wandeln, der zu einem I-Anteil addiert wird.
 			#10 cm = 0.10 m = 1 Grad			
 			weg = self.getWeg(b)
@@ -175,7 +184,7 @@ class RoverDynamic:
 					#i=0
 					self.iAbstand += -i
 					self.iAbstand = round(self.iAbstand,5)
-				
+			self.iAbstand=0
 			#
 			#self.iAbstand = max(-self.params['iMax'],self.iAbstand)
 			#self.iAbstand = min(self.params['iMax'],self.iAbstand)
@@ -184,7 +193,14 @@ class RoverDynamic:
 			#
 			#leit wird korrigiert, um abstand zu verringern und 
 			# offset zwischen gps-Richtung und compass-Richtung auszugleichen
+			
+			#print(pAbstandwinkel)
+			pAbstandwinkel = min(pAbstandwinkel,90)
+			#print(pAbstandwinkel)
+			pAbstandwinkel = max(pAbstandwinkel,-90)
+			print('leitwinkel:',leit,'abstandswinkel:',pAbstandwinkel)			
 			result = leit - pAbstandwinkel + self.iAbstand  #abstand links muss winkel vergrößern			
+			#result = -result
 			while result > 360:
 				result -= 360
 			while result < 0:
@@ -323,20 +339,53 @@ def testPositionDynamic():
 def testLenk():
 	offset.writeOffset(0.1)
 	a = Position(0.0,0.0,1)		
+	#
 	b = Position(10.0,10.0,1)
+	c = Position(0.0,10.0,1)
+	d = Position(-10.0,10.0,1)
+	e = Position(-10.0,0.0,1)
+	f = Position(-10.0,-10.0,1)
+	g = Position(0.0,-10.0,1)
+	h = Position(10.0,-10.0,1)
+	i = Position(10.0,0.0,1)
+	bb = [b,c,d,e,f,g,h,i]
+	#bb=[]
+	#bb.append(c)
+	#bb.append(b)
+	
 	r = Position(1.0,1.0,1)
-	rd = RoverDynamic()
-	rs = RoverStatic(a,b,r)
-	alpha = rd.getLenkrichtungDynamisch(rs)
-	print('alpha',alpha)
+	time.sleep(2)
+	
+	print('\n\n\n')
+	for j in bb:		
+		rd = RoverDynamic()
+		rs = RoverStatic(a,j,r)
+		leit = rs.getLeitstrahlWinkel()
+		leit = round(math.degrees(leit),1)
+		alpha = rd.getLenkrichtungDynamisch(rs)					
+		print(j,'rover',r,'leit',leit,'alpha',alpha)
+		
+	print('\n\n\n')
+	r = Position(-1.0,-1.0,1)
+	for j in bb:		
+		rd = RoverDynamic()
+		rs = RoverStatic(a,j,r)
+		leit = rs.getLeitstrahlWinkel()
+		leit = round(math.degrees(leit),1)
+		alpha = rd.getLenkrichtungDynamisch(rs)					
+		print(j,'rover',r,'leit',leit,'alpha',alpha)
+		
+		
 
 def testWeg():
-	offset.writeOffset(0.1)
+	offset.writeOffset(0.0)
 	a = Position(0.0,0.0,1)		
 	b = Position(10.0,10.0,1)
 	r = Position(1.0,1.0,1)
 	w = Position(2.0,2.0,1)
 	rd = RoverDynamic()
+	time.sleep(1)
+	print('--------------------------------')
 	rs = RoverStatic(a,b,r)
 	alpha = rd.getLenkrichtungDynamisch(rs)	
 	print('alpha',alpha)
@@ -348,6 +397,6 @@ def testWeg():
 if __name__ == "__main__":
 	#test()	
 	#testPositionDynamic()
-	#testLenk()
-	testWeg()
+	testLenk()
+	#testWeg()
 	

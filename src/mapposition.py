@@ -57,8 +57,10 @@ def posAktSection(list):
 def setArePosWeiter(are):
 	list = are.getPattern()
 	i=posAktSection(list)
-	print("setArePosWeiter:",i,"Section:",list)
-	are.setPos(i-1)
+	print("setArePosWeiter:",i)
+	i = i-1
+	i = max(-1,i) #war -2 
+	are.setPos(i)
 	return i
 
 	

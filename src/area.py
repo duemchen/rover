@@ -48,7 +48,9 @@ class area:
 		self.__pattern = None #list der punkte in fester reihenfolge
 		self.furchenbreite = 0.2
 		self.pos = -1
-		self.pos = -1
+		
+	def __str__(self):
+		return 'area pos='+str(self.pos)+', patterLen='+str(len(self.__pattern))
 		
 	def setPos(self,i):
 		self.pos = i
@@ -164,42 +166,51 @@ class area:
 		
 	def getNextSectionPaar(self):
 		''' das nächste Paar '''
-		result = []
-		self.pos +=1
-		if self.pos > len(self.__pattern)-1:
-			return None,None
-		result.append(self.__pattern[self.pos])	
-		self.pos +=1
-		if self.pos > len(self.__pattern)-1:
-			return None,None
-		result.append(self.__pattern[self.pos])			
-		return result[0],result[1]
+		try:
+			result = []
+			self.pos +=1
+			if self.pos > len(self.__pattern)-1:
+				return None,None
+			result.append(self.__pattern[self.pos])	
+			self.pos +=1
+			if self.pos > len(self.__pattern)-1:
+				return None,None
+			result.append(self.__pattern[self.pos])			
+			return result[0],result[1]
+		finally:
+			self.sendMapDoneSoll() #war unten im finally
 
 	def getNextSectionEinzel(self):
 		''' letzer Punkt bis zum nächsten '''
-		self.sendMapDoneSoll() #war unten im finally
-		result = []
-		if self.pos == -1:
+		try:
+			result = []
+			if self.pos == -1:
+				self.pos +=1
+			if self.pos > len(self.__pattern)-1:
+				return None,None
+			result.append(self.__pattern[self.pos])	
 			self.pos +=1
-		if self.pos > len(self.__pattern)-1:
-			return None,None
-		result.append(self.__pattern[self.pos])	
-		self.pos +=1
-		if self.pos > len(self.__pattern)-1:
-			return None,None
-		result.append(self.__pattern[self.pos])			
-		return result[0],result[1]
+			if self.pos > len(self.__pattern)-1:
+				return None,None
+			result.append(self.__pattern[self.pos])			
+			return result[0],result[1]
+		finally:
+			self.sendMapDoneSoll() #war unten im finally
+		
 	
 	def getFirstPoint(self):
 		result = self.__pattern[0]
 		return result
 	def reset(self):
 		self.pos = -1
-		self.__pattern[0]
+		#self.__pattern[0]
 		
 	def addAktPos(self,a):
 		self.__pattern.insert(0, a)
-		
+	
+	def setPattern(self,p):
+		self.__pattern=p
+	
 		
 		'''
 			die punkte sind so in der rechten reihenfolge, der rover muss immer 2 zu einer strecke machen am wendepunkt
@@ -285,7 +296,7 @@ def prepare():
 	result.calcPatternLang()
 	#result.calcPatternBreit()
 	p = result.getPattern()
-	print('prepare: geojson\n\n',getGeoJson(p),'\n')
+	#print('prepare: geojson\n\n',getGeoJson(p),'\n')
 	return result
 
 	
@@ -324,7 +335,7 @@ def loadMap(filename,furchenbreite = 0.5):
 	result.calcPatternLang()
 	#result.calcPatternBreit()
 	p = result.getPattern()
-	print('prepare: geojson\n\n',getGeoJson(p),'\n')
+	#print('prepare: geojson\n\n',getGeoJson(p),'\n')
 	return result
 
 def loadRahmen(filename):	
@@ -405,7 +416,6 @@ def sendsimplemap(mp):
 	#print('loads\n', arr[0])	
 	#print('loads\n', arr[1])	
 	
-
 	
 def resetIst():
 	global ist
@@ -421,7 +431,7 @@ def addIstAndSend(pos):
 	auf dem server gebaut und erweitert werden, 
 	wenn die Datensendung zu groß ist.
 	'''
-	ist.append(pos)
+	ist.append(pos.copy())
 	#print(ist)
 	s =  getJsonMap(ist)
 	#print('s\n',s)
@@ -456,11 +466,33 @@ def testDoneSollIst():
 	a.sendMapDoneSoll()
 	resetIst()
 
-		
+
+	
+def loadAB(pa,pb):
+		are = area(Position(0.0,-0.0,1),Position(-4.0,10.0,1),Position(12.0,12.0,1),Position(10.0,-2.0,1))
+		p = []
+		p.append(pa)
+		p.append(pb)
+		are.setPattern(p)
+		return are
+
+def sendgpspos(pos):
+	s = json.dumps({ "x": pos.x, "y": pos.y,"fix": pos.fix})
+	mqtt_test.mqttsend('gps',s)
+
+	
 if __name__ == "__main__":
 	#testist()
 	#mapnowtest()
-	testDoneSollIst()
+	#testDoneSollIst()
+	
+	gpspos = Position(0,0,1)	
+	sendgpspos(gpspos)
+	resetIst()
+	addIstAndSend(gpspos)
+	are = loadAB(Position(-50,10,1),Position(50,10,1)) # 	
+	are.sendMapDoneSoll()
+	sendmap(are)
 	
 	
 
